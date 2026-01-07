@@ -17,8 +17,39 @@ public class InMemoryWorkflowService implements WorkflowService {
     @PostConstruct
     public void init() {
         try {
+            workflows.put("wf-0", mapper.readValue("""
+                    {
+                                     "nodes": [
+                                       {
+                                         "id": "1",
+                                         "type": "trigger.whatsapp",
+                                         "config": {}
+                                       },
+                                       {
+                                         "id": "2",
+                                         "type": "gmail.send",
+                                         "config": {
+                                           "to": "admin@test.com"
+                                         }
+                                       },
+                                       {
+                                         "id": "3",
+                                         "type": "whatsapp.send",
+                                         "config": {
+                                           "template": "received"
+                                         }
+                                       }
+                                     ],
+                                     "edges": [
+                                       {
+                                         "source": "1",
+                                         "target": "2",
+                                         "sourceHandle": "default"
+                                       }
+                                     ]
+                                   }
+                    """, WorkflowDefinition.class));
 
-            // 🔹 Flow 1: WhatsApp → Gmail
             workflows.put("wf-1", mapper.readValue("""
                     {
                       "nodes": [
