@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  application:
+    name: LLM Service
+  webflux:
+    base-path: /service
+  datasource:
+    url: jdbc:mysql://localhost:3306/LLM_DB
+    username: dev
+    password: shehan@123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+logging:
+  file:
+    name: ./log/llmsrv.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %5p %c{1}:%L - %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %5p %c{1}:%L - %m%n"
+
+plugin:
+  path: "../llm_service/plugins/"
