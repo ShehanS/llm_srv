@@ -100,7 +100,7 @@ public class SettingsServiceImpl implements SettingsService {
 
 
     @Override
-    public Tool ggetTool(Long pluginId) {
+    public Tool getTool(Long pluginId) {
         ToolEntity toolEntity = pluginRepository.findById(pluginId)
                 .orElseThrow(() -> new RuntimeException("Tool not found: " + pluginId));
         return Tool.fromEntity(toolEntity, Tool.class);

@@ -12,7 +12,7 @@ public interface SettingsService {
     public Tool update(Tool tool);
     public Tool status(Tool tool);
     public Flux<Tool> getTools();
-    public Tool ggetTool(Long toolId);
+    public Tool getTool(Long toolId);
 
     public Flux<Agent> getAgents();
 

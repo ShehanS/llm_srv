@@ -8,5 +8,8 @@ import java.util.Map;
 public class FlowNode {
     private String id;
     private String type;
+    private String label;
+    private String color;
+    private Position position;
     private Map<String, Object> config;
 }

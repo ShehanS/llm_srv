@@ -83,7 +83,7 @@ public class SettingsController {
     public ResponseEntity<ResponseMessage> getTool(@PathVariable Long toolId) {
         log.info("API Request: Get plugin {}", toolId);
         try {
-            Object plugin = settingsService.ggetTool(toolId);
+            Object plugin = settingsService.getTool(toolId);
             return ResponseEntity.ok(
                     new ResponseMessage(
                             ResponseCode.SUCCESS.getCode(),
