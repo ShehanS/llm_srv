@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Position {
-    private double x;
-    private double y;
+public class Output {
+    private String id;
+    private String label;
+    private String position;
 }

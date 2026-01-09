@@ -14,4 +14,7 @@ public interface WorkflowEngine {
     public Flux<ExecutionTrace> liveTrace(String runId);
 
     Flux<ExecutionTrace> liveNodeTrace(String runId, String nodeId);
+
+    Mono<String> runFromNode(MessageBatch batch, WorkflowDefinition wf, String startNodeId);
+
 }

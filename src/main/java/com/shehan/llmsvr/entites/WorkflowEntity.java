@@ -1,5 +1,7 @@
 package com.shehan.llmsvr.entites;
 
+import com.shehan.llmsvr.dtos.Definition;
+import com.shehan.llmsvr.helper.DefinitionConverter;
 import com.shehan.llmsvr.helper.JsonConverter;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,9 +30,9 @@ public class WorkflowEntity {
     @Column(name = "description")
     private String description;
 
-    @Convert(converter = JsonConverter.class)
+    @Convert(converter = DefinitionConverter.class)
     @Column(columnDefinition = "TEXT")
-    private Map<String, Object> definition;
+    private Definition definition;
 
     @Column(name = "flow_state")
     private boolean state;

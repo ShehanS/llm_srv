@@ -8,9 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExecutionContext {
-
     private FlowNode node;
     private MessageBatch messages;
     private String runId;
-    private int attempt;
+    private Integer attempt;
 }
