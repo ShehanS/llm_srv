@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 
-@AllArgsConstructor
+
 @Data
 public class WorkflowDefinition {
     private List<FlowNode> nodes;

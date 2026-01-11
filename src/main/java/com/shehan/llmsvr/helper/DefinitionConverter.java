@@ -1,11 +1,11 @@
 package com.shehan.llmsvr.helper;
 
-import com.shehan.llmsvr.dtos.Definition;
+import com.shehan.llmsvr.dtos.WorkflowDefinition;
 import jakarta.persistence.Converter;
 
 @Converter
-public class DefinitionConverter extends GenericJsonConverter<Definition> {
+public class DefinitionConverter extends GenericJsonConverter<WorkflowDefinition> {
     public DefinitionConverter() {
-        super(Definition.class);
+        super(WorkflowDefinition.class);
     }
 }

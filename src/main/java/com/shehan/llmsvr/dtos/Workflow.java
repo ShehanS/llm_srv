@@ -16,7 +16,7 @@ public class Workflow extends BaseClass<Workflow, WorkflowEntity> {
     private String flowId;
     private String flowName;
     private String description;
-    private Definition definition;
+    private WorkflowDefinition definition;
     private boolean state;
     private Instant createdAt;
     private Instant updatedAt;

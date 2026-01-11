@@ -1,13 +1,11 @@
 package com.shehan.llmsvr.entites;
 
-import com.shehan.llmsvr.dtos.Definition;
+import com.shehan.llmsvr.dtos.WorkflowDefinition;
 import com.shehan.llmsvr.helper.DefinitionConverter;
-import com.shehan.llmsvr.helper.JsonConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
-import java.util.Map;
 
 @Table(name = "workflows")
 @Getter
@@ -32,7 +30,7 @@ public class WorkflowEntity {
 
     @Convert(converter = DefinitionConverter.class)
     @Column(columnDefinition = "TEXT")
-    private Definition definition;
+    private WorkflowDefinition definition;
 
     @Column(name = "flow_state")
     private boolean state;
