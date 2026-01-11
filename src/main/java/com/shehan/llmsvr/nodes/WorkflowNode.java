@@ -9,5 +9,5 @@ public interface WorkflowNode {
 
     String getType();
 
-    NodeResult execute(MessageBatch input, Map<String, Object> config);
+    NodeResult execute(MessageBatch input, Map<String, Object> config) throws Exception;
 }
