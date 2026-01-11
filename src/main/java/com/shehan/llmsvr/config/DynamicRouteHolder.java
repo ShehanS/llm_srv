@@ -8,8 +8,6 @@ import org.springframework.web.reactive.function.server.RequestPredicates;
 
 @Component
 public class DynamicRouteHolder {
-
-    // ✅ SAFE initial router (always at least one route)
     private volatile RouterFunction<ServerResponse> routes =
             RouterFunctions.route(
                     RequestPredicates.GET("/__route_placeholder"),
