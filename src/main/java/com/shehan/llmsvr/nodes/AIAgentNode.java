@@ -4,6 +4,7 @@ import com.shehan.llmsvr.dtos.MessageBatch;
 import com.shehan.llmsvr.dtos.NodeResult;
 import com.shehan.llmsvr.dtos.WorkflowMessage;
 import com.shehan.llmsvr.helper.ExpressionResolver;
+import com.shehan.llmsvr.helper.MapStructureDebugger;
 import com.shehan.llmsvr.helper.NodeConfigUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -24,24 +25,24 @@ public class AIAgentNode implements WorkflowNode {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public NodeResult execute(MessageBatch input, Map<String, Object> config) {
         try {
             WorkflowMessage first = input.getItems().get(0);
             Map<String, Object> inData = first.getData();
+            Map<String, Object> inputContext = Map.of(
+                    "input", inData,
+                    "body", inData,
+                    "all", inData
+            );
+            Map<String, Object> requestPayload =
+                    buildAgentRequestPayload(config, inputContext, inData);
 
-            String sessionId =
-                    String.valueOf(inData.getOrDefault("contact", UUID.randomUUID().toString()));
-
-            String message =
-                    String.valueOf(inData.getOrDefault("message", ""));
-
-            Map<String, Object> requestPayload = new HashMap<>();
-            requestPayload.put("sessionId", sessionId);
-            requestPayload.put("messages", List.of(message));
+            log.info("FINAL AI REQUEST PAYLOAD: {}", requestPayload);
 
             String url = NodeConfigUtil.getInputProp(config, "agentURL", "");
-
+            if (url == null || url.isBlank()) {
+                throw new IllegalStateException("Agent URL is required");
+            }
             Object response = webClient
                     .post()
                     .uri(url)
@@ -52,65 +53,32 @@ public class AIAgentNode implements WorkflowNode {
                     .bodyToMono(Object.class)
                     .block();
 
-            Map<String, Object> responseData;
-            if (response instanceof Map<?, ?>) {
-                responseData = new HashMap<>((Map<String, Object>) response);
-            } else {
-                responseData = Map.of("data", response);
-            }
+            Map<String, Object> responseData =
+                    response instanceof Map
+                            ? new HashMap<>((Map<String, Object>) response)
+                            : Map.of("data", response);
 
-            // Extract mapper configuration
-            Map<String, Object> mapper =
-                    NodeConfigUtil.getInputPropMapper(config, "mapper", new HashMap<>());
+            MapStructureDebugger.printStructure(responseData);
 
-            String payloadSource =
-                    NodeConfigUtil.getMapperPayloadSource(config, "mapper", "body");
+            Map<String, Object> outputContext = Map.of(
+                    "body", responseData,
+                    "input", inData,
+                    "all", responseData
+            );
 
-            String payloadExpression =
-                    NodeConfigUtil.getMapperPayloadExpression(config, "mapper", "");
+            Map<String, Object> out = resolveMapper(
+                    config,
+                    "outputMapper",
+                    outputContext,
+                    responseData
+            );
 
-            List<Map<String, String>> mappings =
-                    NodeConfigUtil.getMapperMap(config, "mapper", new ArrayList<>());
-
-            // Apply transformation with priority: mappings > expression > source
-            Object payload;
-
-            if (mappings != null && !mappings.isEmpty()) {
-                payload = applyMapper(mappings, responseData, inData);
-                log.debug("Using Object Mapper with {} mappings", mappings.size());
-
-            } else if (payloadExpression != null && !payloadExpression.isBlank()) {
-                payload = ExpressionResolver.resolve(
-                        payloadExpression,
-                        Map.of(
-                                "body", responseData,
-                                "input", inData,
-                                "all", responseData
-                        )
-                );
-                log.debug("Using Payload Expression: {}", payloadExpression);
-
-            } else {
-                payload = switch (payloadSource) {
-                    case "input" -> new HashMap<>(inData);
-                    case "all" -> new HashMap<>(responseData);
-                    default -> responseData;
-                };
-                log.debug("Using Payload Source: {}", payloadSource);
-            }
-
-            Map<String, Object> out;
-            if (payload instanceof Map) {
-                out = new HashMap<>((Map<String, Object>) payload);
-            } else {
-                out = new HashMap<>();
-                out.put("data", payload);
-            }
-
+            System.out.println(out);
             return new NodeResult(
                     "success",
                     new MessageBatch(List.of(new WorkflowMessage(out)))
             );
+
 
         } catch (Exception e) {
             log.error("AI Agent error", e);
@@ -118,37 +86,108 @@ public class AIAgentNode implements WorkflowNode {
         }
     }
 
-    private Map<String, Object> applyMapper(
-            List<Map<String, String>> mapper,
-            Map<String, Object> body,
-            Map<String, Object> input
+    private Map<String, Object> buildAgentRequestPayload(
+            Map<String, Object> config,
+            Map<String, Object> inputContext,
+            Map<String, Object> inData
     ) {
+
+        Map<String, Object> payload = new HashMap<>(defaultInputPayload(inData));
+
+        List<Map<String, String>> mappings =
+                NodeConfigUtil.getMapperMap(config, "inputMapper", Collections.emptyList());
+
+        for (Map<String, String> mapping : mappings) {
+            String key = mapping.get("key");
+            String valueExpr = mapping.get("value");
+
+            if (key == null || key.isBlank()) continue;
+
+            Object resolved;
+            if (valueExpr != null && valueExpr.startsWith("{{") && valueExpr.endsWith("}}")) {
+                resolved = ExpressionResolver.resolve(valueExpr, inputContext);
+            } else {
+                resolved = valueExpr;
+            }
+
+            payload.put(key, resolved);
+        }
+        normalizeAgentPayload(payload);
+
+        return payload;
+    }
+
+    private Map<String, Object> defaultInputPayload(Map<String, Object> inData) {
+
+        String sessionId =
+                String.valueOf(inData.getOrDefault("sessionId", UUID.randomUUID().toString()));
+
+        Object messageValue = inData.get("message");
+
+        List<String> messages;
+        if (messageValue instanceof List<?> list) {
+            messages = new ArrayList<>();
+            for (Object item : list) {
+                messages.add(String.valueOf(item));
+            }
+        } else if (messageValue != null) {
+            messages = List.of(String.valueOf(messageValue));
+        } else {
+            messages = List.of("");
+        }
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("messages", messages);
+        payload.put("sessionId", sessionId);
+
+        return payload;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void normalizeAgentPayload(Map<String, Object> payload) {
+        Object messagesObj = payload.get("messages");
+
+        if (messagesObj instanceof List<?> list) {
+            List<String> normalized = new ArrayList<>();
+            for (Object o : list) {
+                normalized.add(String.valueOf(o));
+            }
+            payload.put("messages", normalized);
+        } else if (messagesObj != null) {
+            payload.put("messages", List.of(String.valueOf(messagesObj)));
+        } else {
+            payload.put("messages", List.of(""));
+        }
+        payload.putIfAbsent("sessionId", UUID.randomUUID().toString());
+    }
+
+    private Map<String, Object> resolveMapper(
+            Map<String, Object> config,
+            String mapperName,
+            Map<String, Object> context,
+            Map<String, Object> fallback
+    ) {
+        List<Map<String, String>> mappings =
+                NodeConfigUtil.getMapperMap(config, mapperName, Collections.emptyList());
+
+        if (mappings == null || mappings.isEmpty()) {
+            return new HashMap<>(fallback);
+        }
+
         Map<String, Object> result = new HashMap<>();
 
-        Map<String, Object> context = Map.of(
-                "body", body,
-                "input", input,
-                "all", body
-        );
-
-        for (Map<String, String> mapping : mapper) {
+        for (Map<String, String> mapping : mappings) {
             String key = mapping.get("key");
-            String valueExpression = mapping.get("value");
+            String valueExpr = mapping.get("value");
 
-            if (key == null || key.isBlank()) {
-                continue;
-            }
+            if (key == null || key.isBlank()) continue;
 
-            Object resolvedValue;
-            if (valueExpression != null
-                    && valueExpression.startsWith("{{")
-                    && valueExpression.endsWith("}}")) {
-                resolvedValue = ExpressionResolver.resolve(valueExpression, context);
-            } else {
-                resolvedValue = valueExpression;
-            }
+            Object resolved =
+                    (valueExpr != null && valueExpr.startsWith("{{") && valueExpr.endsWith("}}"))
+                            ? ExpressionResolver.resolve(valueExpr, context)
+                            : valueExpr;
 
-            result.put(key, resolvedValue);
+            result.put(key, resolved);
         }
 
         return result;
