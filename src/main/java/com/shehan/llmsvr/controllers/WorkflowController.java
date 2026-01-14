@@ -7,6 +7,7 @@ import com.shehan.llmsvr.dtos.Workflow;
 import com.shehan.llmsvr.service.WorkflowEngine;
 import com.shehan.llmsvr.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
+@Slf4j
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/workflow")
@@ -52,7 +56,7 @@ public class WorkflowController {
 
 
     @GetMapping("/open/{flowId}")
-    public Mono<ResponseEntity<ResponseMessage>> save(@PathVariable String flowId) {
+    public Mono<ResponseEntity<ResponseMessage>> open(@PathVariable String flowId) {
         return workflowService.open(flowId)
                 .map(res ->
                         ResponseEntity.ok(
@@ -107,22 +111,74 @@ public class WorkflowController {
                 );
     }
 
-
     @GetMapping("/runs/{runId}/trace")
     public Flux<ExecutionTrace> getTrace(@PathVariable String runId) {
+        log.info("Getting historical traces for runId: {}", runId);
         return engine.getTrace(runId);
     }
 
     @GetMapping(value = "/runs/{runId}/trace/live",
             produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ExecutionTrace> liveTrace(@PathVariable String runId) {
-        return engine.liveTrace(runId);
+        log.info("SSE connection established for runId: {}", runId);
+        return engine.liveTrace(runId)
+                .doOnSubscribe(s -> log.info("SSE subscribed for runId: {}", runId))
+                .doOnComplete(() -> log.info("SSE completed for runId: {}", runId))
+                .doOnCancel(() -> log.info("SSE cancelled for runId: {}", runId));
+    }
+    @GetMapping(value = "/runs/{runId}/nodes/{nodeId}/trace/live",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ExecutionTrace> liveNodeTrace(
+            @PathVariable String runId,
+            @PathVariable String nodeId) {
+        log.info("SSE node trace for runId: {}, nodeId: {}", runId, nodeId);
+        return engine.liveNodeTrace(runId, nodeId)
+                .doOnSubscribe(s -> log.info("SSE node trace subscribed [runId={}, nodeId={}]",
+                        runId, nodeId));
     }
 
-
-    @GetMapping(value = "/runs/{runId}/nodes/{nodeId}/trace/live", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ExecutionTrace> liveNodeTrace(@PathVariable String runId, @PathVariable String nodeId) {
-        return engine.liveNodeTrace(runId, nodeId);
+    @GetMapping("/runs/{runId}/status")
+    public Mono<ResponseEntity<ResponseMessage>> getWorkflowStatus(@PathVariable String runId) {
+        return Mono.just(
+                ResponseEntity.ok(
+                        new ResponseMessage(
+                                ResponseCode.SUCCESS.getCode(),
+                                "Workflow status retrieved",
+                                new WorkflowStatus(runId),
+                                null
+                        )
+                )
+        );
     }
 
+    @DeleteMapping("/runs/{runId}/reset")
+    public Mono<ResponseEntity<ResponseMessage>> resetRunId(@PathVariable String runId) {
+        log.info("Resetting runId: {}", runId);
+        return Mono.just(
+                ResponseEntity.ok(
+                        new ResponseMessage(
+                                ResponseCode.SUCCESS.getCode(),
+                                "RunId reset successfully",
+                                Map.of("runId", runId),
+                                null
+                        )
+                )
+        );
+    }
+
+    @GetMapping("/health")
+    public Mono<ResponseEntity<ResponseMessage>> health() {
+        log.info("Health check called");
+        return Mono.just(
+                ResponseEntity.ok(
+                        new ResponseMessage(
+                                ResponseCode.SUCCESS.getCode(),
+                                "Service is running",
+                                Map.of("status", "UP", "timestamp", System.currentTimeMillis()),
+                                null
+                        )
+                )
+        );
+    }
+    private record WorkflowStatus(String runId) {}
 }

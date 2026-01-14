@@ -143,7 +143,7 @@ public class HttpRouteBuilder {
                                     MessageBatch batch =
                                             new MessageBatch(List.of(new WorkflowMessage(messageData)));
 
-                                    return engine.run(batch, wf.getDefinition())
+                                    return engine.run(batch, wf.getDefinition(), flowId)
                                             .then(ServerResponse.ok()
                                                     .contentType(MediaType.parseMediaType(mediaType))
                                                     .bodyValue(Map.of(
@@ -214,7 +214,7 @@ public class HttpRouteBuilder {
                                     MessageBatch batch =
                                             new MessageBatch(List.of(new WorkflowMessage(messageData)));
 
-                                    return engine.run(batch, wf.getDefinition())
+                                    return engine.run(batch, wf.getDefinition(), flowId)
                                             .then(ServerResponse.ok()
                                                     .contentType(MediaType.parseMediaType(mediaType))
                                                     .bodyValue(Map.of(

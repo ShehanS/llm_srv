@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface WorkflowEngine {
-    public Mono<String> run(MessageBatch startMessages, WorkflowDefinition wf);
+    public Mono<String> run(MessageBatch startMessages, WorkflowDefinition wf, String runId);
 
     public Flux<ExecutionTrace> getTrace(String runId);
 
