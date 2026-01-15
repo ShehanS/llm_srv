@@ -3,11 +3,8 @@ package com.shehan.llmsvr.entites;
 import com.shehan.llmsvr.dtos.ToolStatus;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -23,24 +20,21 @@ public class ToolEntity implements Serializable {
     private Integer id;
 
     @Column(nullable = false, unique = true)
-    private String toolId;
+    private String name; // e.g., "sql_tool"
 
-    @Column(nullable = false)
-    private String name;
-
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String fileName;
+    @Column(nullable = false)
+    private String type; // "script" or "api"
 
-    private String path;
+    @Column(columnDefinition = "TEXT")
+    private String code; // The JavaScript string for VM2
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinTable(
-            name = "tool_agents",
-            joinColumns = @JoinColumn(name = "tool_id"),
-            inverseJoinColumns = @JoinColumn(name = "agent_id")
-    )
-    private Set<AgentEntity> agents = new HashSet<>();
+    private String url; // Only used if type is "api"
+
+    @Column(name = "tool_schema", columnDefinition = "JSON")
+    private String toolSchema; // The JSON Schema for the LLM
 
     @Enumerated(EnumType.STRING)
     private ToolStatus status;
@@ -52,9 +46,7 @@ public class ToolEntity implements Serializable {
     protected void onCreate() {
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
-        if (this.status == null) {
-            this.status = ToolStatus.ACTIVE;
-        }
+        if (this.status == null) this.status = ToolStatus.ACTIVE;
     }
 
     @PreUpdate

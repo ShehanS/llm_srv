@@ -2,8 +2,9 @@ package com.shehan.llmsvr.entites;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -21,7 +22,6 @@ public class AgentEntity implements Serializable {
     @Column(nullable = false, unique = true, name = "agent_name")
     private String agentName;
 
-    @Column(columnDefinition = "TEXT")
     private String displayName;
 
     @Column(columnDefinition = "TEXT")
@@ -39,6 +39,12 @@ public class AgentEntity implements Serializable {
     @Column(name = "system_prompt", columnDefinition = "TEXT")
     private String systemPrompt;
 
-    @Column(columnDefinition = "JSON")
-    private String tools;
+    // Relationship: One agent can have many tools
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "tool_agents",
+            joinColumns = @JoinColumn(name = "agent_id"),
+            inverseJoinColumns = @JoinColumn(name = "tool_id")
+    )
+    private Set<ToolEntity> tools = new HashSet<>();
 }

@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface AgentRepository extends JpaRepository<AgentEntity, Long> {
+public interface AgentRepository extends JpaRepository<AgentEntity, Integer> {
     Optional<AgentEntity> findByAgentName(String agentName);
 }

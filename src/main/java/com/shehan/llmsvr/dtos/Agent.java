@@ -1,9 +1,12 @@
 package com.shehan.llmsvr.dtos;
 
 import com.shehan.llmsvr.entites.AgentEntity;
+import com.shehan.llmsvr.entites.ModelConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -14,18 +17,8 @@ public class Agent extends BaseClass<Agent, AgentEntity> {
     private String displayName;
     private String description;
     private String expertise;
-    private Boolean isDefault = false;
     private ModelConfig model;
     private String systemPrompt;
-    private String[] tools;
+    private List<Tool> tools;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ModelConfig {
-        private String provider;
-        private String name;
-        private Double temperature;
-        private String apiKey;
-    }
 }
