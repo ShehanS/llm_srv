@@ -8,6 +8,7 @@ import com.shehan.llmsvr.dtos.Tool;
 import com.shehan.llmsvr.entites.AgentEntity;
 import com.shehan.llmsvr.entites.RoutingConfigEntity;
 import com.shehan.llmsvr.entites.ToolEntity;
+import com.shehan.llmsvr.event.EventPublisher;
 import com.shehan.llmsvr.repositories.AgentRepository;
 import com.shehan.llmsvr.repositories.RoutingRepository;
 import com.shehan.llmsvr.repositories.ToolRepository;
@@ -20,6 +21,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -28,24 +31,29 @@ public class ConfigServiceImpl implements ConfigService {
     private final AgentRepository agentRepository;
     private final ToolRepository toolRepository;
     private final RoutingRepository routingRepository;
+    private final EventPublisher eventPublisher;
 
 
     @Override
     public Mono<MainConfig> getFullConfig(String routeName) {
-        return Mono.zip(
-                getAllAgents().collectList(),
-                Mono.fromCallable(() -> routingRepository.findByRouteName(routeName)
-                                .orElseThrow(() -> new RuntimeException("Routing config not found for: " + routeName)))
-                        .subscribeOn(Schedulers.boundedElastic())
-        ).map(tuple -> MainConfig.builder()
-                .agents(tuple.getT1())
-                .routing(RoutingConfig.builder()
-                        .routeName(tuple.getT2().getRouteName())
-                        .classifierModel(tuple.getT2().getClassifierModel())
-                        .fallbackAgent(tuple.getT2().getFallbackAgent())
-                        .routingPrompt(tuple.getT2().getRoutingPrompt())
-                        .build())
-                .build());
+        return Mono.fromCallable(() -> routingRepository.findByRouteName(routeName)
+                        .orElseThrow(() -> new RuntimeException("Routing config not found for: " + routeName)))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(entity -> {
+                    List<Agent> assignedAgents = entity.getAgents().stream()
+                            .map(agentEntity -> Agent.fromEntity(agentEntity, Agent.class))
+                            .toList();
+                    return MainConfig.builder()
+                            .agents(assignedAgents)
+                            .routing(RoutingConfig.builder()
+                                    .id(entity.getId())
+                                    .routeName(entity.getRouteName())
+                                    .classifierModel(entity.getClassifierModel())
+                                    .fallbackAgent(entity.getFallbackAgent())
+                                    .routingPrompt(entity.getRoutingPrompt())
+                                    .build())
+                            .build();
+                });
     }
 
     @Override
@@ -60,6 +68,7 @@ public class ConfigServiceImpl implements ConfigService {
     public Mono<Agent> addAgent(AgentEntity agent) {
         return Mono.fromCallable(() -> agentRepository.save(agent))
                 .map(entity -> Agent.fromEntity(entity, Agent.class))
+                .doOnSuccess(savedAgent -> eventPublisher.configSaved())
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -72,6 +81,7 @@ public class ConfigServiceImpl implements ConfigService {
                     agent.setId(existing.getId());
                     return agentRepository.save(agent.toEntity(AgentEntity.class));
                 }).map(entity -> Agent.fromEntity(entity, Agent.class))
+                .doOnSuccess(updateAgent -> eventPublisher.configSaved())
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -87,6 +97,7 @@ public class ConfigServiceImpl implements ConfigService {
     public Mono<Void> deleteAgent(Integer id) {
         return Mono.fromRunnable(() -> agentRepository.deleteById(id))
                 .subscribeOn(Schedulers.boundedElastic())
+                .doOnSuccess(deleteAgent -> eventPublisher.configSaved())
                 .then();
     }
 
@@ -95,6 +106,7 @@ public class ConfigServiceImpl implements ConfigService {
     public Mono<Void> deleteRouteConfig(Integer id) {
         return Mono.fromRunnable(() -> routingRepository.deleteById(id))
                 .subscribeOn(Schedulers.boundedElastic())
+                .doOnSuccess(routeAgent -> eventPublisher.configSaved())
                 .then();
     }
 
@@ -104,6 +116,7 @@ public class ConfigServiceImpl implements ConfigService {
     public Mono<Tool> addTool(ToolEntity tool) {
         return Mono.fromCallable(() -> toolRepository.save(tool))
                 .map(entity -> Tool.fromEntity(entity, Tool.class))
+                .doOnSuccess(addTool -> eventPublisher.configSaved())
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -116,6 +129,7 @@ public class ConfigServiceImpl implements ConfigService {
                     tool.setId(existing.getId());
                     return toolRepository.save(tool.toEntity(ToolEntity.class));
                 }).map(entity -> Tool.fromEntity(entity, Tool.class))
+                .doOnSuccess(updateTool -> eventPublisher.configSaved())
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -130,6 +144,7 @@ public class ConfigServiceImpl implements ConfigService {
     public Mono<Void> deleteTool(Integer id) {
         return Mono.fromRunnable(() -> toolRepository.deleteById(id))
                 .subscribeOn(Schedulers.boundedElastic())
+                .doOnSuccess(deleteTool -> eventPublisher.configSaved())
                 .then();
     }
 
@@ -138,24 +153,27 @@ public class ConfigServiceImpl implements ConfigService {
     @Transactional
     public Mono<Void> linkToolToAgent(Integer agentId, Integer toolId) {
         return Mono.fromRunnable(() -> {
-            AgentEntity agent = agentRepository.findById(agentId)
-                    .orElseThrow(() -> new RuntimeException("Agent not found"));
-            ToolEntity tool = toolRepository.findById(toolId)
-                    .orElseThrow(() -> new RuntimeException("Tool not found"));
-            agent.getTools().add(tool);
-            agentRepository.save(agent);
-        }).subscribeOn(Schedulers.boundedElastic()).then();
+                    AgentEntity agent = agentRepository.findById(agentId)
+                            .orElseThrow(() -> new RuntimeException("Agent not found"));
+                    ToolEntity tool = toolRepository.findById(toolId)
+                            .orElseThrow(() -> new RuntimeException("Tool not found"));
+                    agent.getTools().add(tool);
+                    agentRepository.save(agent);
+
+                }).doOnSuccess(linkAgent -> eventPublisher.configSaved())
+                .subscribeOn(Schedulers.boundedElastic()).then();
     }
 
     @Override
     @Transactional
     public Mono<Void> unlinkToolFromAgent(Integer agentId, Integer toolId) {
         return Mono.fromRunnable(() -> {
-            AgentEntity agent = agentRepository.findById(agentId)
-                    .orElseThrow(() -> new RuntimeException("Agent not found"));
-            agent.getTools().removeIf(t -> t.getId().equals(toolId));
-            agentRepository.save(agent);
-        }).subscribeOn(Schedulers.boundedElastic()).then();
+                    AgentEntity agent = agentRepository.findById(agentId)
+                            .orElseThrow(() -> new RuntimeException("Agent not found"));
+                    agent.getTools().removeIf(t -> t.getId().equals(toolId));
+                    agentRepository.save(agent);
+                }).doOnSuccess(linkAgent -> eventPublisher.configSaved())
+                .subscribeOn(Schedulers.boundedElastic()).then();
     }
 
 
@@ -172,6 +190,7 @@ public class ConfigServiceImpl implements ConfigService {
                     RoutingConfigEntity routingConfig = routingRepository.save(routing.toEntity(RoutingConfigEntity.class));
                     return RoutingConfig.fromEntity(routingConfig, RoutingConfig.class);
                 })
+                .doOnSuccess(addConfig -> eventPublisher.configSaved())
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -182,6 +201,88 @@ public class ConfigServiceImpl implements ConfigService {
                     RoutingConfigEntity routingConfig = routingRepository.save(routing.toEntity(RoutingConfigEntity.class));
                     return RoutingConfig.fromEntity(routingConfig, RoutingConfig.class);
                 })
+                .doOnSuccess(updateConfig -> eventPublisher.configSaved())
                 .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> linkAgentToRoute(Integer routeId, Integer agentId) {
+        return Mono.zip(
+                        Mono.fromCallable(() -> routingRepository.findById(routeId))
+                                .flatMap(Mono::justOrEmpty)
+                                .switchIfEmpty(Mono.error(new RuntimeException("Route not found"))),
+                        Mono.fromCallable(() -> agentRepository.findById(agentId))
+                                .flatMap(Mono::justOrEmpty)
+                                .switchIfEmpty(Mono.error(new RuntimeException("Agent not found")))
+                )
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(tuple -> {
+                    RoutingConfigEntity route = tuple.getT1();
+                    AgentEntity agent = tuple.getT2();
+                    route.getAgents().add(agent);
+                    return Mono.fromCallable(() -> routingRepository.save(route))
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .then();
+                })
+                .doOnSuccess(linkAgent -> {
+                    eventPublisher.configSaved();
+                });
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> unlinkAgentFromRoute(Integer routeId, Integer agentId) {
+        return Mono.fromCallable(() -> routingRepository.findById(routeId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(Mono::justOrEmpty)
+                .switchIfEmpty(Mono.error(new RuntimeException("Route not found")))
+                .flatMap(route -> {
+                    boolean removed = route.getAgents().removeIf(agent -> agent.getId().equals(agentId));
+                    if (removed) {
+                        return Mono.fromCallable(() -> routingRepository.save(route))
+                                .subscribeOn(Schedulers.boundedElastic())
+                                .then();
+                    }
+                    return Mono.empty();
+                })
+                .doOnSuccess(unlinkTool -> {
+                    eventPublisher.configSaved();
+                });
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> linkAgentToRouteByName(String routeName, String agentName) {
+        return Mono.zip(
+                Mono.justOrEmpty(routingRepository.findByRouteName(routeName))
+                        .switchIfEmpty(Mono.error(new RuntimeException("Route '" + routeName + "' not found"))),
+                Mono.justOrEmpty(agentRepository.findByAgentName(agentName))
+                        .switchIfEmpty(Mono.error(new RuntimeException("Agent '" + agentName + "' not found")))
+        ).flatMap(tuple -> {
+            RoutingConfigEntity route = tuple.getT1();
+            AgentEntity agent = tuple.getT2();
+            route.getAgents().add(agent);
+            routingRepository.save(route);
+            return Mono.empty();
+        });
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> unlinkAgentFromRouteByName(String routeName, String agentName) {
+        return Mono.zip(
+                Mono.justOrEmpty(routingRepository.findByRouteName(routeName))
+                        .switchIfEmpty(Mono.error(new RuntimeException("Route '" + routeName + "' not found"))),
+                Mono.justOrEmpty(agentRepository.findByAgentName(agentName))
+                        .switchIfEmpty(Mono.error(new RuntimeException("Agent '" + agentName + "' not found")))
+        ).flatMap(tuple -> {
+            RoutingConfigEntity route = tuple.getT1();
+            AgentEntity agent = tuple.getT2();
+            if (route.getAgents().remove(agent)) {
+                routingRepository.save(route);
+            }
+            return Mono.empty();
+        });
     }
 }

@@ -28,7 +28,6 @@ public class ConfigController {
                 .onErrorResume(this::handleError);
     }
 
-
     @PostMapping("/agents")
     public Mono<ResponseEntity<ResponseMessage>> addAgent(@RequestBody AgentEntity agent) {
         return configService.addAgent(agent)
@@ -53,7 +52,6 @@ public class ConfigController {
                 .onErrorResume(this::handleError);
     }
 
-
     @PutMapping("/tools/{toolId}")
     public Mono<ResponseEntity<ResponseMessage>> updateTool(@PathVariable Integer toolId, @RequestBody Tool tool) {
         return configService.updateTool(toolId, tool)
@@ -61,7 +59,6 @@ public class ConfigController {
                         new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool updated successfully", null, null))))
                 .onErrorResume(this::handleError);
     }
-
 
     @PostMapping("/tools")
     public Mono<ResponseEntity<ResponseMessage>> addTool(@RequestBody ToolEntity tool) {
@@ -83,7 +80,7 @@ public class ConfigController {
     public Mono<ResponseEntity<ResponseMessage>> linkTool(@PathVariable Integer agentId, @PathVariable Integer toolId) {
         return configService.linkToolToAgent(agentId, toolId)
                 .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool linked to agent successfully", null, null))))
+                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool linked successfully", null, null))))
                 .onErrorResume(this::handleError);
     }
 
@@ -91,19 +88,25 @@ public class ConfigController {
     public Mono<ResponseEntity<ResponseMessage>> unLinkTool(@PathVariable Integer agentId, @PathVariable Integer toolId) {
         return configService.unlinkToolFromAgent(agentId, toolId)
                 .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool unlinked to agent successfully", null, null))))
+                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool unlinked successfully", null, null))))
                 .onErrorResume(this::handleError);
     }
 
-
-    @PutMapping("/route-config")
-    public Mono<ResponseEntity<ResponseMessage>> updateRouting(@RequestBody RoutingConfig routing) {
-        return configService.updateRoutingConfig(routing)
-                .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Routing updated successfully", res, null)))
+    @PostMapping("/routing-config/{routeId}/link-agent/{agentId}")
+    public Mono<ResponseEntity<ResponseMessage>> linkAgentToRoute(@PathVariable Integer routeId, @PathVariable Integer agentId) {
+        return configService.linkAgentToRoute(routeId, agentId)
+                .then(Mono.just(ResponseEntity.ok(
+                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Agent linked to route successfully", null, null))))
                 .onErrorResume(this::handleError);
     }
 
+    @DeleteMapping("/routing-config/{routeId}/unlink-agent/{agentId}")
+    public Mono<ResponseEntity<ResponseMessage>> unlinkAgentFromRoute(@PathVariable Integer routeId, @PathVariable Integer agentId) {
+        return configService.unlinkAgentFromRoute(routeId, agentId)
+                .then(Mono.just(ResponseEntity.ok(
+                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Agent unlinked from route successfully", null, null))))
+                .onErrorResume(this::handleError);
+    }
 
     @GetMapping("/agents")
     public Mono<ResponseEntity<ResponseMessage>> getAllAgents() {
@@ -112,7 +115,6 @@ public class ConfigController {
                         new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Agents retrieved successfully", res, null)))
                 .onErrorResume(this::handleError);
     }
-
 
     @GetMapping("/tools")
     public Mono<ResponseEntity<ResponseMessage>> getAllTools() {
@@ -138,7 +140,6 @@ public class ConfigController {
                 .onErrorResume(this::handleError);
     }
 
-
     @PostMapping("/routing-config")
     public Mono<ResponseEntity<ResponseMessage>> addRoutingConfig(@RequestBody RoutingConfig routingConfig) {
         return configService.addRoutingConfigs(routingConfig)
@@ -151,18 +152,17 @@ public class ConfigController {
     public Mono<ResponseEntity<ResponseMessage>> updateRoutingConfig(@RequestBody RoutingConfig routingConfig) {
         return configService.updateRoutingConfig(routingConfig)
                 .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Routing config added successfully", res, null)))
+                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Routing config updated successfully", res, null)))
                 .onErrorResume(this::handleError);
     }
 
-    @DeleteMapping("/routing-config/{agentId}")
-    public Mono<ResponseEntity<ResponseMessage>> deleteRouteConfig(@PathVariable Integer agentId) {
-        return configService.deleteRouteConfig(agentId)
+    @DeleteMapping("/routing-config/{id}")
+    public Mono<ResponseEntity<ResponseMessage>> deleteRouteConfig(@PathVariable Integer id) {
+        return configService.deleteRouteConfig(id)
                 .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Route agent deleted successfully", null, null))))
+                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Route config deleted successfully", null, null))))
                 .onErrorResume(this::handleError);
     }
-
 
     private Mono<ResponseEntity<ResponseMessage>> handleError(Throwable ex) {
         log.error("API Error: ", ex);

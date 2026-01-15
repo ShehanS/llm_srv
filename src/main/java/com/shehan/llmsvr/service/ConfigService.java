@@ -43,4 +43,13 @@ public interface ConfigService {
     Mono<RoutingConfig> addRoutingConfigs(RoutingConfig routingConfig);
 
     Mono<RoutingConfig> updateRoutingConfig(RoutingConfig routing);
+
+    Mono<Void> linkAgentToRoute(Integer routeId, Integer agentId);
+
+    Mono<Void> unlinkAgentFromRoute(Integer routeId, Integer agentId);
+
+    Mono<Void> linkAgentToRouteByName(String routeName, String agentName);
+
+    Mono<Void> unlinkAgentFromRouteByName(String routeName, String agentName);
 }
+

@@ -2,6 +2,7 @@ package com.shehan.llmsvr.entites;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +40,9 @@ public class AgentEntity implements Serializable {
     @Column(name = "system_prompt", columnDefinition = "TEXT")
     private String systemPrompt;
 
-    // Relationship: One agent can have many tools
+    @ManyToMany(mappedBy = "agents")
+    private Set<RoutingConfigEntity> routingConfigs = new HashSet<>();
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "tool_agents",

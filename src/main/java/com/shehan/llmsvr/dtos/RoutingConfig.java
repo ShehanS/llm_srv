@@ -7,14 +7,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class RoutingConfig extends BaseClass<RoutingConfig, RoutingConfigEntity>{
+public class RoutingConfig extends BaseClass<RoutingConfig, RoutingConfigEntity> {
     private Integer id;
     private String routeName;
     private ModelConfig classifierModel;
     private String fallbackAgent;
     private String routingPrompt;
+    private List<Agent> agents;
 }

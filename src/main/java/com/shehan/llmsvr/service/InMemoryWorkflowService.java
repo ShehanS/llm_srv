@@ -3,7 +3,7 @@ package com.shehan.llmsvr.service;
 import com.shehan.llmsvr.dtos.Workflow;
 import com.shehan.llmsvr.dtos.WorkflowDefinition;
 import com.shehan.llmsvr.entites.WorkflowEntity;
-import com.shehan.llmsvr.event.WorkflowEventPublisher;
+import com.shehan.llmsvr.event.EventPublisher;
 import com.shehan.llmsvr.repositories.WorkflowRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -28,7 +28,7 @@ public class InMemoryWorkflowService implements WorkflowService {
     private final WorkflowRepository workflowRepository;
     private final Map<String, WorkflowDefinition> workflows = new HashMap<>();
     private final ObjectMapper mapper = new ObjectMapper();
-    private final WorkflowEventPublisher workflowEventPublisher;
+    private final EventPublisher eventPublisher;
 
     @PostConstruct
     public void init() {
@@ -180,7 +180,7 @@ public class InMemoryWorkflowService implements WorkflowService {
                 })
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnSuccess(savedWorkflow ->
-                        workflowEventPublisher.workflowSaved()
+                        eventPublisher.workflowSaved()
                 );
     }
 
