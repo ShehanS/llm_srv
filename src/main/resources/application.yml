@@ -33,3 +33,8 @@ logging:
 
 plugin:
   path: "../llm_service/plugins/"
+intelligent-srv:
+  url: http://localhost:8500
+
+
+
