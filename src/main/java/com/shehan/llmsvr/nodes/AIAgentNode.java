@@ -7,6 +7,7 @@ import com.shehan.llmsvr.helper.ExpressionResolver;
 import com.shehan.llmsvr.helper.MapStructureDebugger;
 import com.shehan.llmsvr.helper.NodeConfigUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -16,7 +17,8 @@ import java.util.*;
 @Slf4j
 @Component
 public class AIAgentNode implements WorkflowNode {
-
+    @Value("${intelligent-srv.url}")
+    private String intelligentSrvUrl;
     private final WebClient webClient = WebClient.builder().build();
 
     @Override
@@ -40,6 +42,19 @@ public class AIAgentNode implements WorkflowNode {
             log.info("FINAL AI REQUEST PAYLOAD: {}", requestPayload);
 
             String url = NodeConfigUtil.getInputProp(config, "agentURL", "");
+            String routeAgent = NodeConfigUtil.getInputProp(config, "routeAgent", "");
+            String configUrl = intelligentSrvUrl + "/api/v1/fetch-config/" + routeAgent;
+
+            Object responseFetchConfig = webClient
+                    .get()
+                    .uri(configUrl)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            log.info("Reload config response {}", responseFetchConfig);
+
+
             if (url == null || url.isBlank()) {
                 throw new IllegalStateException("Agent URL is required");
             }

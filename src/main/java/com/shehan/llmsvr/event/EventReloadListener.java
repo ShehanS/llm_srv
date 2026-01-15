@@ -35,15 +35,15 @@ public class EventReloadListener {
         log.info("Configuration change detected for route: {}. Notifying AI Service...");
         String aiServiceUrl = intelligentSrvUrl + "/api/v1/reload";
 
-        webClientBuilder.build()
-                .post()
-                .uri(aiServiceUrl)
-                .retrieve()
-                .bodyToMono(String.class)
-                .subscribe(
-                        response -> log.info("AI Service successfully reloaded: {}", response),
-                        error -> log.error("Failed to notify AI Service: {}", error.getMessage())
-                );
+//        webClientBuilder.build()
+//                .post()
+//                .uri(aiServiceUrl)
+//                .retrieve()
+//                .bodyToMono(String.class)
+//                .subscribe(
+//                        response -> log.info("AI Service successfully reloaded: {}", response),
+//                        error -> log.error("Failed to notify AI Service: {}", error.getMessage())
+//                );
     }
 }
 
