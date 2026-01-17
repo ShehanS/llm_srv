@@ -4,12 +4,14 @@ import com.shehan.llmsvr.dtos.*;
 import com.shehan.llmsvr.nodes.WorkflowNode;
 import com.shehan.llmsvr.service.NodeRegistry;
 import com.shehan.llmsvr.service.WorkflowEngine;
+import com.shehan.llmsvr.service.WorkflowStateManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
+
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,9 +25,11 @@ public class WorkflowEngineImpl implements WorkflowEngine {
     private final Map<String, List<ExecutionTrace>> tracesByRunId = new ConcurrentHashMap<>();
     private final Map<String, Sinks.Many<ExecutionTrace>> sinksByRunId = new ConcurrentHashMap<>();
     private final Set<String> activeRuns = ConcurrentHashMap.newKeySet();
+    private final WorkflowStateManager stateManager;
 
-    public WorkflowEngineImpl(NodeRegistry registry) {
+    public WorkflowEngineImpl(NodeRegistry registry, WorkflowStateManager stateManager) {
         this.registry = registry;
+        this.stateManager = stateManager;
     }
 
     private Sinks.Many<ExecutionTrace> getOrCreateSink(String runId) {
@@ -38,10 +42,8 @@ public class WorkflowEngineImpl implements WorkflowEngine {
     @Override
     public Mono<String> run(MessageBatch startMessages, WorkflowDefinition wf, String runId) {
         prepareForRun(runId);
-
         FlowNode startNode = findStartNode(wf);
         executeWorkflow(new ExecutionContext(startNode, startMessages, runId, 0), wf);
-
         return Mono.just(runId);
     }
 
@@ -104,35 +106,47 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         FlowNode nodeDef = ctx.getNode();
         MessageBatch inputMessages = ctx.getMessages();
         Instant startedAt = Instant.now();
-
-        emitTrace(new ExecutionTrace(
-                ctx.getRunId(), nodeDef.getId(), nodeDef.getType(),
-                inputMessages, null, nodeDef.getConfig(),
-                ExecutionTrace.Status.RUNNING, startedAt, null, null
-        ));
+        emitTrace(createTrace(ctx, ExecutionTrace.Status.RUNNING, startedAt, inputMessages, null, null));
 
         WorkflowNode node = registry.get(nodeDef.getType());
-        if (node == null) return Flux.error(new IllegalStateException("Node type not found: " + nodeDef.getType()));
-
         return Mono.fromCallable(() -> node.execute(inputMessages, nodeDef.getConfig()))
                 .subscribeOn(Schedulers.boundedElastic())
-                .doOnSuccess(result -> {
-                    emitTrace(ExecutionTrace.builder()
-                            .runId(ctx.getRunId())
-                            .nodeId(nodeDef.getId())
-                            .nodeType(nodeDef.getType())
-                            .input(safeInput(inputMessages))
-                            .output(safeInput(result.getMessages()))
-                            .status(ExecutionTrace.Status.COMPLETE)
-                            .startedAt(startedAt)
-                            .completedAt(Instant.now())
-                            .build());
-                })
                 .flatMapMany(result -> {
+                    if (result.getStatus() == NodeResult.Status.WAITING) {
+                        log.info("Node {} is waiting for approval. Suspending run {}", nodeDef.getId(), ctx.getRunId());
+                        emitTrace(createTrace(ctx, ExecutionTrace.Status.WAITING, startedAt, inputMessages, null, result.getWaitPayload()));
+                        stateManager.save(ctx.getRunId(), wf, ctx);
+                        return Flux.empty();
+                    }
+                    if (result.getStatus() == NodeResult.Status.ERROR) {
+                        emitTrace(createTrace(ctx, ExecutionTrace.Status.FAILED, startedAt, inputMessages, result.getMessages(), "Node returned error status"));
+                        return Flux.error(new RuntimeException("Node execution failed"));
+                    }
+                    emitTrace(createTrace(ctx, ExecutionTrace.Status.COMPLETE, startedAt, inputMessages, result.getMessages(), null));
+
                     List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), result.getOutput());
                     return Flux.fromIterable(nextNodes)
                             .map(next -> new ExecutionContext(next, result.getMessages(), ctx.getRunId(), ctx.getAttempt()));
+                }).onErrorResume(e -> {
+                    emitTrace(createTrace(ctx, ExecutionTrace.Status.FAILED, startedAt, inputMessages, null, e.getMessage()));
+                    return Flux.error(e);
                 });
+    }
+
+    public Mono<String> resume(String runId, MessageBatch humanInput, String outputHandle) {
+        WorkflowStateManager.SuspendedState suspended = stateManager.get(runId);
+        if (suspended == null) {
+            return Mono.error(new IllegalStateException("No suspended workflow found for runId: " + runId));
+        }
+        String lastNodeId = suspended.getCtx().getNode().getId();
+        List<FlowNode> nextNodes = findNextNodes(suspended.getWf(), lastNodeId, outputHandle);
+
+        log.info("Resuming runId: {} from node: {}", runId, lastNodeId);
+        for (FlowNode next : nextNodes) {
+            executeWorkflow(new ExecutionContext(next, humanInput, runId, 0), suspended.getWf());
+        }
+
+        return Mono.just(runId);
     }
 
     private void emitTrace(ExecutionTrace trace) {
@@ -163,4 +177,20 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No start node found"));
     }
+
+    private ExecutionTrace createTrace(ExecutionContext ctx, ExecutionTrace.Status status, Instant start, MessageBatch input, MessageBatch output, Object metadata) {
+        return ExecutionTrace.builder()
+                .runId(ctx.getRunId())
+                .nodeId(ctx.getNode().getId())
+                .nodeType(ctx.getNode().getType())
+                .config(ctx.getNode().getConfig())
+                .input(input)
+                .output(output)
+                .status(status)
+                .startedAt(start)
+                .completedAt(status == ExecutionTrace.Status.RUNNING ? null : Instant.now())
+                .metadata(metadata)
+                .build();
+    }
+
 }

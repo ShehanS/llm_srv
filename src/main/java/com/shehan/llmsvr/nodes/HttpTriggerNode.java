@@ -20,23 +20,15 @@ public class HttpTriggerNode implements WorkflowNode {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public NodeResult execute(MessageBatch input, Map<String, Object> config) {
-
         try {
             WorkflowMessage in = input.getItems().get(0);
             Map<String, Object> data = in.getData();
 
-            String allowedMethods =
-                    NodeConfigUtil.getInputProp(config, "method", "GET");
-
-            String mediaType =
-                    NodeConfigUtil.getInputProp(config, "mediaType", "application/json");
-
-            Map<String, Object> mapper = NodeConfigUtil.getInputPropMapper(config, "mapper", new HashMap<>());
-
+            String allowedMethods = NodeConfigUtil.getInputProp(config, "method", "GET");
             String payloadSource = NodeConfigUtil.getMapperPayloadSource(config, "mapper", "body");
             String payloadExpression = NodeConfigUtil.getMapperPayloadExpression(config, "mapper", "");
-            List<Map<String, String>> mappings = NodeConfigUtil.getMapperMap(config, "mapper", new ArrayList<>());
 
             String method = String.valueOf(data.get("method"));
             Map<String, Object> body = castMap(data.get("body"));
@@ -45,26 +37,25 @@ public class HttpTriggerNode implements WorkflowNode {
 
             if (!isMethodAllowed(method, allowedMethods)) {
                 log.warn("HTTP method not allowed: {}", method);
-                return new NodeResult("error", input);
+                return NodeResult.error(input);
             }
 
+            Map<String, Object> context = Map.of(
+                    "body", body,
+                    "headers", headers,
+                    "query", query,
+                    "all", data
+            );
+
             Object payload;
-            if (mappings != null && !mappings.isEmpty()) {
-                payload = applyMapper(mappings, body, headers, query, data);
-                log.debug("Using Object Mapper with {} mappings", mappings.size());
+            Map<String, Object> resolvedMappings = ExpressionResolver.resolve(config, "mapper", context, null);
 
+            if (resolvedMappings != null && !resolvedMappings.isEmpty()) {
+                payload = resolvedMappings;
+                log.debug("Using Object Mapper with resolved mappings");
             } else if (payloadExpression != null && !payloadExpression.isBlank()) {
-                payload = ExpressionResolver.resolve(
-                        payloadExpression,
-                        Map.of(
-                                "body", body,
-                                "headers", headers,
-                                "query", query,
-                                "all", data
-                        )
-                );
+                payload = ExpressionResolver.resolve(payloadExpression, context);
                 log.debug("Using Payload Expression: {}", payloadExpression);
-
             } else {
                 payload = switch (payloadSource) {
                     case "headers" -> new HashMap<>(headers);
@@ -76,60 +67,19 @@ public class HttpTriggerNode implements WorkflowNode {
             }
 
             Map<String, Object> out;
-
             if (payload instanceof Map) {
                 out = new HashMap<>((Map<String, Object>) payload);
             } else {
                 out = new HashMap<>();
-                out.put("data", payload);
+                out.put("data", payload != null ? payload : Collections.emptyMap());
             }
 
-            return new NodeResult(
-                    "default",
-                    new MessageBatch(List.of(new WorkflowMessage(out)))
-            );
+            return NodeResult.complected("default", new MessageBatch(List.of(new WorkflowMessage(out))));
 
         } catch (Exception e) {
             log.error("HTTP trigger error", e);
-            return new NodeResult("error", input);
+            return NodeResult.error(input);
         }
-    }
-
-    private Map<String, Object> applyMapper(
-            List<Map<String, String>> mapper,
-            Map<String, Object> body,
-            Map<String, String> headers,
-            Map<String, String> query,
-            Map<String, Object> allData
-    ) {
-        Map<String, Object> result = new HashMap<>();
-
-        Map<String, Object> context = Map.of(
-                "body", body,
-                "headers", headers,
-                "query", query,
-                "all", allData
-        );
-
-        for (Map<String, String> mapping : mapper) {
-            String key = mapping.get("key");
-            String valueExpression = mapping.get("value");
-
-            if (key == null || key.isBlank()) {
-                continue;
-            }
-
-            Object resolvedValue;
-            if (valueExpression != null && valueExpression.startsWith("{{") && valueExpression.endsWith("}}")) {
-                resolvedValue = ExpressionResolver.resolve(valueExpression, context);
-            } else {
-                resolvedValue = valueExpression;
-            }
-
-            result.put(key, resolvedValue);
-        }
-
-        return result;
     }
 
     private boolean isMethodAllowed(String method, String allowed) {
@@ -140,12 +90,12 @@ public class HttpTriggerNode implements WorkflowNode {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> castMap(Object o) {
-        return o instanceof Map<?, ?> m ? (Map<String, Object>) m : Map.of();
+        return o instanceof Map<?, ?> m ? (Map<String, Object>) m : new HashMap<>();
     }
 
     @SuppressWarnings("unchecked")
     private Map<String, String> castStringMap(Object o) {
-        if (!(o instanceof Map<?, ?> m)) return Map.of();
+        if (!(o instanceof Map<?, ?> m)) return new HashMap<>();
         Map<String, String> result = new HashMap<>();
         m.forEach((k, v) -> result.put(String.valueOf(k), String.valueOf(v)));
         return result;

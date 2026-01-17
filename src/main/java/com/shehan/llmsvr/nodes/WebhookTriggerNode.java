@@ -25,6 +25,6 @@ public class WebhookTriggerNode implements WorkflowNode {
         log.debug("WebhookTriggerNode input: {}", input);
         log.debug("WebhookTriggerNode config: {}", config);
 
-        return new NodeResult("default", input);
+        return NodeResult.complected("default", input);
     }
 }

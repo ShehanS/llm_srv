@@ -1,6 +1,8 @@
 package com.shehan.llmsvr.nodes;
 
-import com.shehan.llmsvr.dtos.*;
+import com.shehan.llmsvr.dtos.MessageBatch;
+import com.shehan.llmsvr.dtos.NodeResult;
+import com.shehan.llmsvr.dtos.WorkflowMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,6 @@ public class WhatsAppNode implements WorkflowNode {
            log.info("📱 WhatsApp → " + msg.getData());
         }
 
-        return new NodeResult("success", input);
+        return NodeResult.complected("success", input);
     }
 }

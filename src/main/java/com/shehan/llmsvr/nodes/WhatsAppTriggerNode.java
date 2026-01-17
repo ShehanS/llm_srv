@@ -1,10 +1,14 @@
 package com.shehan.llmsvr.nodes;
 
-import com.shehan.llmsvr.dtos.*;
+import com.shehan.llmsvr.dtos.MessageBatch;
+import com.shehan.llmsvr.dtos.NodeResult;
+import com.shehan.llmsvr.dtos.WorkflowMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -124,6 +128,6 @@ public class WhatsAppTriggerNode implements WorkflowNode {
             )));
         }
 
-        return new NodeResult("default", new MessageBatch(output));
+        return NodeResult.complected("default", new MessageBatch(output));
     }
 }

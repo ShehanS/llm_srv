@@ -16,22 +16,25 @@ public class HttpResponseNode implements WorkflowNode {
     public String getType() {
         return "http.response";
     }
+
     @Override
     public NodeResult execute(MessageBatch input, Map<String, Object> config) {
+        if (input == null || input.getItems() == null || input.getItems().isEmpty()) {
+            return NodeResult.error(input);
+        }
 
         WorkflowMessage msg = input.getItems().get(0);
         Map<String, Object> ctx = msg.getData();
 
-        Object bodyExpr =
-                NodeConfigUtil.getInputProp(config, "body", "{{body}}");
+        Object bodyExpr = NodeConfigUtil.getInputProp(config, "body", "{{body}}");
 
-        Object resolved =
-                ExpressionResolver.resolve(
-                        String.valueOf(bodyExpr),
-                        ctx
-                );
+        Object resolved = ExpressionResolver.resolve(
+                String.valueOf(bodyExpr),
+                ctx
+        );
 
         ctx.put("__httpResponse__", resolved);
-        return new NodeResult("stop", input);
+
+        return NodeResult.complected("stop", input);
     }
 }

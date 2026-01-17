@@ -1,97 +1,114 @@
 package com.shehan.llmsvr.helper;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ExpressionResolver {
 
-    public static Object resolve(
-            String expression,
-            Map<String, Object> context
+    private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\{\\{(.+?)\\}\\}");
+
+    public static Map<String, Object> resolve(
+            Map<String, Object> config,
+            String mapperName,
+            Map<String, Object> context,
+            Map<String, Object> fallback
     ) {
+        List<Map<String, String>> mappings = NodeConfigUtil.getMapperMap(config, mapperName, null);
+
+        if (mappings == null || mappings.isEmpty()) {
+            return new HashMap<>(fallback);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+
+        for (Map<String, String> mapping : mappings) {
+            String key = mapping.get("key");
+            String valueExpr = mapping.get("value");
+
+            if (key == null || key.isBlank()) continue;
+
+            result.put(key, resolve(valueExpr, context));
+        }
+
+        return result;
+    }
+
+    public static Object resolve(String expression, Map<String, Object> context) {
         if (expression == null || expression.isBlank()) {
             return null;
         }
 
-        // Remove the {{ }} markers and trim
-        String exp = expression
-                .replace("{{", "")
-                .replace("}}", "")
-                .trim();
-
-        // If requesting "all", return entire context
-        if ("all".equals(exp)) {
-            return context;
+        if (expression.startsWith("{{") && expression.endsWith("}}") && countOccurrences(expression, "{{") == 1) {
+            String path = expression.substring(2, expression.length() - 2).trim();
+            return resolvePath(path, context);
         }
 
-        // Split by dots to get the path
-        String[] parts = exp.split("\\.");
+        StringBuilder sb = new StringBuilder();
+        Matcher matcher = EXPRESSION_PATTERN.matcher(expression);
+        int lastEnd = 0;
 
-        if (parts.length == 0) {
-            return null;
+        while (matcher.find()) {
+            sb.append(expression, lastEnd, matcher.start());
+            Object resolved = resolvePath(matcher.group(1).trim(), context);
+            sb.append(resolved != null ? resolved.toString() : "");
+            lastEnd = matcher.end();
         }
+        sb.append(expression.substring(lastEnd));
 
-        // Start with the root key
-        Object current = context.get(parts[0]);
+        return sb.toString();
+    }
 
-        if (current == null) {
-            return null;
+    private static Object resolvePath(String path, Map<String, Object> context) {
+        if ("all".equals(path)) return context;
+
+        String[] parts = path.split("\\.");
+        Object current = context;
+
+        for (String part : parts) {
+            current = navigate(current, part);
+            if (current == null) return null;
         }
-
-        // Navigate through the path
-        for (int i = 1; i < parts.length; i++) {
-            current = navigateToKey(current, parts[i]);
-
-            if (current == null) {
-                return null;
-            }
-        }
-
         return current;
     }
 
     @SuppressWarnings("unchecked")
-    private static Object navigateToKey(Object obj, String key) {
-        if (obj == null) {
-            return null;
-        }
+    private static Object navigate(Object obj, String key) {
+        if (obj == null) return null;
 
-        // Handle Map navigation
         if (obj instanceof Map) {
-            Map<String, Object> map = (Map<String, Object>) obj;
-            return map.get(key);
+            return ((Map<String, Object>) obj).get(key);
         }
 
-        // Handle List navigation (for array indices)
         if (obj instanceof List && isNumeric(key)) {
             List<?> list = (List<?>) obj;
             int index = Integer.parseInt(key);
-            if (index >= 0 && index < list.size()) {
-                return list.get(index);
-            }
-            return null;
+            return (index >= 0 && index < list.size()) ? list.get(index) : null;
         }
 
-        // Try to access as property using reflection (optional, for POJOs)
         try {
             var field = obj.getClass().getDeclaredField(key);
             field.setAccessible(true);
             return field.get(obj);
         } catch (Exception e) {
-            // Field doesn't exist or can't access
             return null;
         }
     }
 
     private static boolean isNumeric(String str) {
-        if (str == null || str.isEmpty()) {
-            return false;
+        return str != null && str.matches("\\d+");
+    }
+
+    private static int countOccurrences(String str, String sub) {
+        if (str == null || sub == null || str.isEmpty() || sub.isEmpty()) return 0;
+        int count = 0;
+        int idx = 0;
+        while ((idx = str.indexOf(sub, idx)) != -1) {
+            count++;
+            idx += sub.length();
         }
-        try {
-            Integer.parseInt(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+        return count;
     }
 }

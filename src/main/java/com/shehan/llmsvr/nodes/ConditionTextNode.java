@@ -24,15 +24,16 @@ public class ConditionTextNode implements WorkflowNode {
 
         boolean match = false;
 
-        for (WorkflowMessage msg : input.getItems()) {
-            Object text = msg.getData().get("message");
-            if (text != null && text.toString().contains(contains)) {
-                match = true;
-                break;
+        if (input != null && input.getItems() != null) {
+            for (WorkflowMessage msg : input.getItems()) {
+                Object text = msg.getData().get("message");
+                if (text != null && contains != null && text.toString().contains(contains)) {
+                    match = true;
+                    break;
+                }
             }
         }
 
-        // output must match edge sourceHandle
-        return new NodeResult(match ? "true" : "false", input);
+        return NodeResult.complected(match ? "true" : "false", input);
     }
 }

@@ -1,10 +1,13 @@
 package com.shehan.llmsvr.nodes;
 
-import com.shehan.llmsvr.dtos.*;
+import com.shehan.llmsvr.dtos.MessageBatch;
+import com.shehan.llmsvr.dtos.NodeResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Slf4j
 @Component
 public class GmailNode implements WorkflowNode {
 
@@ -15,8 +18,7 @@ public class GmailNode implements WorkflowNode {
 
     @Override
     public NodeResult execute(MessageBatch input, Map<String, Object> config) {
-
-        System.out.println("📧 Gmail config → " + config);
-        return new NodeResult("success", input);
+        log.info("📧 Executing Gmail Node with config: {}", config);
+                return NodeResult.complected("success", input);
     }
 }

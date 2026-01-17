@@ -24,9 +24,12 @@ public class ExecutionTrace {
     private Instant startedAt;
     private Instant completedAt;
     private String error;
+    private Object metadata;
 
     public enum Status {
         PENDING,
+        WAITING,
+        FAILED,
         RUNNING,
         ERROR,
         COMPLETE

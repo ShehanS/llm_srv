@@ -4,7 +4,6 @@ import com.shehan.llmsvr.dtos.MessageBatch;
 import com.shehan.llmsvr.dtos.NodeResult;
 import com.shehan.llmsvr.dtos.WorkflowMessage;
 import com.shehan.llmsvr.helper.ExpressionResolver;
-import com.shehan.llmsvr.helper.MapStructureDebugger;
 import com.shehan.llmsvr.helper.NodeConfigUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Instant;
 import java.util.*;
 
 @Slf4j
@@ -27,37 +27,28 @@ public class AIAgentNode implements WorkflowNode {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public NodeResult execute(MessageBatch input, Map<String, Object> config) {
         try {
             WorkflowMessage first = input.getItems().get(0);
             Map<String, Object> inData = first.getData();
-            Map<String, Object> inputContext = Map.of(
-                    "input", inData,
-                    "body", inData,
-                    "all", inData
-            );
-            Map<String, Object> requestPayload =
-                    buildAgentRequestPayload(config, inputContext, inData);
 
-            log.info("FINAL AI REQUEST PAYLOAD: {}", requestPayload);
+            Map<String, Object> inputContext = new HashMap<>();
+            inputContext.put("input", inData);
+            inputContext.put("body", inData.getOrDefault("body", inData));
+            inputContext.put("headers", inData.getOrDefault("headers", Collections.emptyMap()));
+            inputContext.put("query", inData.getOrDefault("query", Collections.emptyMap()));
+            inputContext.put("all", inData);
+
+            Map<String, Object> requestPayload = buildAgentRequestPayload(config, inputContext, inData);
+
+            log.info("Final AI Request Payload: {}", requestPayload);
 
             String url = NodeConfigUtil.getInputProp(config, "agentURL", "");
-            String routeAgent = NodeConfigUtil.getInputProp(config, "routeAgent", "");
-            String configUrl = intelligentSrvUrl + "/api/v1/fetch-config/" + routeAgent;
-
-            Object responseFetchConfig = webClient
-                    .get()
-                    .uri(configUrl)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .bodyToMono(Object.class)
-                    .block();
-            log.info("Reload config response {}", responseFetchConfig);
-
-
             if (url == null || url.isBlank()) {
                 throw new IllegalStateException("Agent URL is required");
             }
+
             Object response = webClient
                     .post()
                     .uri(url)
@@ -68,12 +59,15 @@ public class AIAgentNode implements WorkflowNode {
                     .bodyToMono(Object.class)
                     .block();
 
-            Map<String, Object> responseData =
-                    response instanceof Map
-                            ? new HashMap<>((Map<String, Object>) response)
-                            : Map.of("data", response);
+            Map<String, Object> responseData = response instanceof Map
+                    ? (Map<String, Object>) response
+                    : Map.of("data", response != null ? response : Collections.emptyMap());
 
-            MapStructureDebugger.printStructure(responseData);
+            if (Boolean.TRUE.equals(responseData.get("requires_approval")) ||
+                    "awaiting_approval".equals(responseData.get("status"))) {
+                MessageBatch nextBatch = new MessageBatch(List.of(new WorkflowMessage(responseData)));
+                return NodeResult.complected("default", nextBatch);
+            }
 
             Map<String, Object> outputContext = Map.of(
                     "body", responseData,
@@ -81,23 +75,16 @@ public class AIAgentNode implements WorkflowNode {
                     "all", responseData
             );
 
-            Map<String, Object> out = resolveMapper(
-                    config,
-                    "outputMapper",
-                    outputContext,
-                    responseData
-            );
+            Map<String, Object> out = ExpressionResolver.resolve(config, "outputMapper", outputContext, responseData);
 
-            System.out.println(out);
-            return new NodeResult(
-                    "success",
-                    new MessageBatch(List.of(new WorkflowMessage(out)))
-            );
-
+            return NodeResult.complected("default", new MessageBatch(List.of(new WorkflowMessage(out))));
 
         } catch (Exception e) {
-            log.error("AI Agent error", e);
-            return new NodeResult("error", input);
+            log.error("AI Agent communication failed: {}", e.getMessage());
+            Map<String, Object> errorDetails = new HashMap<>();
+            errorDetails.put("status", "error");
+            errorDetails.put("message", e.getMessage());
+            return NodeResult.error(new MessageBatch(List.of(new WorkflowMessage(errorDetails))));
         }
     }
 
@@ -106,105 +93,50 @@ public class AIAgentNode implements WorkflowNode {
             Map<String, Object> inputContext,
             Map<String, Object> inData
     ) {
-
-        Map<String, Object> payload = new HashMap<>(defaultInputPayload(inData));
-
-        List<Map<String, String>> mappings =
-                NodeConfigUtil.getMapperMap(config, "inputMapper", Collections.emptyList());
-
-        for (Map<String, String> mapping : mappings) {
-            String key = mapping.get("key");
-            String valueExpr = mapping.get("value");
-
-            if (key == null || key.isBlank()) continue;
-
-            Object resolved;
-            if (valueExpr != null && valueExpr.startsWith("{{") && valueExpr.endsWith("}}")) {
-                resolved = ExpressionResolver.resolve(valueExpr, inputContext);
-            } else {
-                resolved = valueExpr;
+        Map<String, Object> finalPayload = new HashMap<>();
+        String payloadSource = NodeConfigUtil.getMapperPayloadSource(config, "inputMapper", "");
+        if (!payloadSource.isBlank()) {
+            Object sourceData = inputContext.get(payloadSource);
+            if (sourceData instanceof Map) {
+                finalPayload.putAll((Map<String, Object>) sourceData);
             }
-
-            payload.put(key, resolved);
         }
-        normalizeAgentPayload(payload);
+        Map<String, Object> resolvedMappings = ExpressionResolver.resolve(
+                config,
+                "inputMapper",
+                inputContext,
+                new HashMap<>()
+        );
 
-        return payload;
-    }
-
-    private Map<String, Object> defaultInputPayload(Map<String, Object> inData) {
-
-        String sessionId =
-                String.valueOf(inData.getOrDefault("sessionId", UUID.randomUUID().toString()));
-
-        Object messageValue = inData.get("message");
-
-        List<String> messages;
-        if (messageValue instanceof List<?> list) {
-            messages = new ArrayList<>();
-            for (Object item : list) {
-                messages.add(String.valueOf(item));
-            }
-        } else if (messageValue != null) {
-            messages = List.of(String.valueOf(messageValue));
-        } else {
-            messages = List.of("");
+        if (resolvedMappings != null) {
+            finalPayload.putAll(resolvedMappings);
         }
 
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("messages", messages);
-        payload.put("sessionId", sessionId);
+        normalizeAgentPayload(finalPayload, inData);
 
-        return payload;
+        return finalPayload;
     }
 
-    @SuppressWarnings("unchecked")
-    private void normalizeAgentPayload(Map<String, Object> payload) {
+    private void normalizeAgentPayload(Map<String, Object> payload, Map<String, Object> inData) {
+        // Handle Messages List
         Object messagesObj = payload.get("messages");
+        List<String> normalizedMessages = new ArrayList<>();
 
         if (messagesObj instanceof List<?> list) {
-            List<String> normalized = new ArrayList<>();
-            for (Object o : list) {
-                normalized.add(String.valueOf(o));
-            }
-            payload.put("messages", normalized);
-        } else if (messagesObj != null) {
-            payload.put("messages", List.of(String.valueOf(messagesObj)));
+            list.forEach(item -> normalizedMessages.add(String.valueOf(item)));
+        } else if (messagesObj != null && !String.valueOf(messagesObj).isBlank()) {
+            normalizedMessages.add(String.valueOf(messagesObj));
         } else {
-            payload.put("messages", List.of(""));
+            Object fallbackMsg = inData.get("message");
+            normalizedMessages.add(fallbackMsg != null ? String.valueOf(fallbackMsg) : "");
         }
-        payload.putIfAbsent("sessionId", UUID.randomUUID().toString());
-    }
+        payload.put("messages", normalizedMessages);
 
-    private Map<String, Object> resolveMapper(
-            Map<String, Object> config,
-            String mapperName,
-            Map<String, Object> context,
-            Map<String, Object> fallback
-    ) {
-        List<Map<String, String>> mappings =
-                NodeConfigUtil.getMapperMap(config, mapperName, Collections.emptyList());
-
-        if (mappings == null || mappings.isEmpty()) {
-            return new HashMap<>(fallback);
+        Object sid = payload.get("sessionId");
+        if (sid == null || String.valueOf(sid).isBlank()) {
+            payload.put("sessionId", inData.getOrDefault("sessionId", UUID.randomUUID().toString()));
+        } else {
+            payload.put("sessionId", String.valueOf(sid));
         }
-
-        Map<String, Object> result = new HashMap<>();
-
-        for (Map<String, String> mapping : mappings) {
-            String key = mapping.get("key");
-            String valueExpr = mapping.get("value");
-
-            if (key == null || key.isBlank()) continue;
-
-            Object resolved =
-                    (valueExpr != null && valueExpr.startsWith("{{") && valueExpr.endsWith("}}"))
-                            ? ExpressionResolver.resolve(valueExpr, context)
-                            : valueExpr;
-
-            result.put(key, resolved);
-        }
-
-        return result;
     }
 }
