@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -50,7 +52,7 @@ public class HumanApprovalNode implements WorkflowNode {
             String agentUrl = intelligentSrvUrl + "/api/v1/approve/" + sessionId;
 
             Map<String, Object> actionRequest = new HashMap<>();
-            boolean isApproved = status.toLowerCase().contains("approved") || action.equalsIgnoreCase("success");
+            boolean isApproved = status.toLowerCase().contains("approved") ? true : false;
             actionRequest.put("approved", isApproved);
 
             log.info("Notifying AI service at {}: approved={}", agentUrl, isApproved);
@@ -65,7 +67,21 @@ public class HumanApprovalNode implements WorkflowNode {
                         .map(res -> res.getBody() != null ? res.getBody() : "SUCCESS")
                         .block();
 
-                inData.put("response", response);
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode resJson = objectMapper.valueToTree(response);
+
+
+                if ((resJson.get("status").asString().equals("completed"))&&(resJson.get("response").get("kwargs") == null)){
+                    inData.put("response", response);
+                    inData.put("status","error");
+                    inData.put("message","Session id not valid or process already complected");
+
+                }else{
+                    String content =resJson.get("response").get("kwargs").get("content").asString();
+                    inData.put("status","success");
+                    inData.put("message", content);
+                }
+
                 log.info("AI service responded: {}", response);
 
             } catch (Exception e) {

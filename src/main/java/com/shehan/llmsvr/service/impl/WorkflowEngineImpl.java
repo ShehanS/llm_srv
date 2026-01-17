@@ -82,14 +82,11 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         return Mono.fromCallable(() -> node.execute(inputMessages, nodeDef.getConfig()))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMapMany(result -> {
-                    // SUSPENSION LOGIC
                     if (result.getStatus() == NodeResult.Status.WAITING) {
                         emitTrace(createTrace(ctx, ExecutionTrace.Status.WAITING, startedAt, inputMessages, null, result.getWaitPayload()));
                         stateManager.save(ctx.getRunId(), wf, ctx);
                         return Flux.empty();
                     }
-
-                    // ERROR LOGIC
                     if (result.getStatus() == NodeResult.Status.ERROR) {
                         emitTrace(createTrace(ctx, ExecutionTrace.Status.FAILED, startedAt, inputMessages, result.getMessages(), "Node execution failed"));
                         return Flux.error(new RuntimeException("Node returned error status"));
