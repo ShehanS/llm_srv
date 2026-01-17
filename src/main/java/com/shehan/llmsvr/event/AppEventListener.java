@@ -5,6 +5,7 @@ import com.shehan.llmsvr.config.HttpRouteBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -12,7 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class EventReloadListener {
+public class AppEventListener {
     @Value("${intelligent-srv.url}")
     private String intelligentSrvUrl;
 
@@ -20,9 +21,19 @@ public class EventReloadListener {
     private final DynamicRouteHolder holder;
     private final WebClient.Builder webClientBuilder;
 
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationReady() {
+        log.info("Netty server is UP and ready, reload routes");
+        builder.buildAsync()
+                .doOnNext(holder::update)
+                .doOnNext(r -> log.info("Routes reloaded after workflow change"))
+                .subscribe();
+    }
+
+
     @EventListener
     public void onWorkflowChanged(WorkflowChangedEvent event) {
-
         builder.buildAsync()
                 .doOnNext(holder::update)
                 .doOnNext(r -> log.info("Routes reloaded after workflow change"))

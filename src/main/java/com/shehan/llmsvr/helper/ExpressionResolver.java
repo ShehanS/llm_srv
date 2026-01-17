@@ -17,7 +17,7 @@ public class ExpressionResolver {
             Map<String, Object> fallback
     ) {
         List<Map<String, String>> mappings = NodeConfigUtil.getMapperMap(config, mapperName, null);
-
+        Map<String, String> flowIdMap = new HashMap<>();
         if (mappings == null || mappings.isEmpty()) {
             return new HashMap<>(fallback);
         }

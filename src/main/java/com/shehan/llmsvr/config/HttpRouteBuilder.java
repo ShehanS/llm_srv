@@ -116,7 +116,7 @@ public class HttpRouteBuilder {
                         request.bodyToMono(Map.class)
                                 .defaultIfEmpty(Map.of())
                                 .flatMap(body -> {
-
+                                    body.put("flowId", flowId);
                                     Map<String, Object> messageData = Map.of(
                                             "provider", "http",
                                             "method", request.method().name(),

@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.Instant;
 import java.util.*;
 
 @Slf4j
@@ -40,6 +39,7 @@ public class AIAgentNode implements WorkflowNode {
             inputContext.put("query", inData.getOrDefault("query", Collections.emptyMap()));
             inputContext.put("all", inData);
 
+
             Map<String, Object> requestPayload = buildAgentRequestPayload(config, inputContext, inData);
 
             log.info("Final AI Request Payload: {}", requestPayload);
@@ -65,6 +65,7 @@ public class AIAgentNode implements WorkflowNode {
 
             if (Boolean.TRUE.equals(responseData.get("requires_approval")) ||
                     "awaiting_approval".equals(responseData.get("status"))) {
+                responseData.put("flowId", String.valueOf(inData.get("flowId")));
                 MessageBatch nextBatch = new MessageBatch(List.of(new WorkflowMessage(responseData)));
                 return NodeResult.complected("default", nextBatch);
             }

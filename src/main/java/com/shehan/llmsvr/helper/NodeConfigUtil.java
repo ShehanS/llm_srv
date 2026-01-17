@@ -1,5 +1,6 @@
 package com.shehan.llmsvr.helper;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,6 @@ public final class NodeConfigUtil {
 
             Object value = prop.get("value");
             if (value != null) {
-                // Handle different types
                 if (fallback instanceof Boolean) {
                     return (T) Boolean.valueOf(String.valueOf(value));
                 } else if (fallback instanceof Integer) {
@@ -36,7 +36,6 @@ public final class NodeConfigUtil {
                 } else if (fallback instanceof List) {
                     return (T) value;
                 } else {
-                    // String or other types
                     if (!String.valueOf(value).isBlank()) {
                         return (T) value;
                     }
@@ -61,9 +60,7 @@ public final class NodeConfigUtil {
         return fallback;
     }
 
-    // --------------------------------------------------
-    // String-specific getter (backward compatibility)
-    // --------------------------------------------------
+
     public static String getInputProp(
             Map<String, Object> config,
             String name,
@@ -74,9 +71,7 @@ public final class NodeConfigUtil {
                 : fallback;
     }
 
-    // --------------------------------------------------
-    // Boolean-specific getter
-    // --------------------------------------------------
+
     public static boolean getInputPropBoolean(
             Map<String, Object> config,
             String name,
@@ -111,9 +106,6 @@ public final class NodeConfigUtil {
         return fallback;
     }
 
-    // --------------------------------------------------
-    // List-specific getter
-    // --------------------------------------------------
     @SuppressWarnings("unchecked")
     public static <T> List<T> getInputPropList(
             Map<String, Object> config,
@@ -143,9 +135,7 @@ public final class NodeConfigUtil {
         return fallback;
     }
 
-    // --------------------------------------------------
-    // Mapper-specific getter - extracts nested mapper value
-    // --------------------------------------------------
+
     @SuppressWarnings("unchecked")
     public static Map<String, Object> getInputPropMapper(
             Map<String, Object> config,
@@ -175,9 +165,7 @@ public final class NodeConfigUtil {
         return fallback;
     }
 
-    // --------------------------------------------------
-    // Get payloadSource from mapper
-    // --------------------------------------------------
+
     public static String getMapperPayloadSource(
             Map<String, Object> config,
             String name,
@@ -190,9 +178,7 @@ public final class NodeConfigUtil {
         return payloadSource != null ? String.valueOf(payloadSource) : fallback;
     }
 
-    // --------------------------------------------------
-    // Get payloadExpression from mapper
-    // --------------------------------------------------
+
     public static String getMapperPayloadExpression(
             Map<String, Object> config,
             String name,
@@ -205,9 +191,7 @@ public final class NodeConfigUtil {
         return payloadExpression != null ? String.valueOf(payloadExpression) : fallback;
     }
 
-    // --------------------------------------------------
-    // Get map array from mapper
-    // --------------------------------------------------
+
     @SuppressWarnings("unchecked")
     public static List<Map<String, String>> getMapperMap(
             Map<String, Object> config,
@@ -219,10 +203,18 @@ public final class NodeConfigUtil {
 
         Object map = mapper.get("map");
         if (map instanceof List<?>) {
-            return (List<Map<String, String>>) map;
+
+            List<Map<String, String>> mappings = (List<Map<String, String>>) map;
+
+            Map<String, String> flowIdMap = new HashMap<>();
+            flowIdMap.put("key", "flowId");
+            flowIdMap.put("value", "{{body.flowId}}");
+            mappings.add(flowIdMap);
+            return mappings;
         }
         return fallback;
     }
+
 
 
 }

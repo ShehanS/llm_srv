@@ -7,11 +7,14 @@ import com.shehan.llmsvr.helper.ExpressionResolver;
 import com.shehan.llmsvr.helper.NodeConfigUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.server.context.WebServerInitializedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.net.InetAddress;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,10 +27,16 @@ public class HumanApprovalNode implements WorkflowNode {
     @Value("${intelligent-srv.url}")
     private String intelligentSrvUrl;
     private final WebClient webClient = WebClient.builder().build();
+    private int port;
 
     @Override
     public String getType() {
         return "human.approval";
+    }
+
+    @EventListener(WebServerInitializedEvent.class)
+    public void init(WebServerInitializedEvent event) {
+        this.port = event.getWebServer().getPort();
     }
 
     @Override
@@ -75,6 +84,7 @@ public class HumanApprovalNode implements WorkflowNode {
                     inData.put("response", response);
                     inData.put("status","error");
                     inData.put("message","Session id not valid or process already complected");
+                    return NodeResult.error(new MessageBatch(List.of(new WorkflowMessage(inData))));
 
                 }else{
                     String content =resJson.get("response").get("kwargs").get("content").asString();
@@ -86,7 +96,9 @@ public class HumanApprovalNode implements WorkflowNode {
 
             } catch (Exception e) {
                 log.error("Failed to notify AI service: {}", e.getMessage());
-                inData.put("response", "ERROR: " + e.getMessage());
+                inData.put("status", "error");
+                inData.put("message", "Session id not found");
+                return NodeResult.error(new MessageBatch(List.of(new WorkflowMessage(inData))));
             }
 
             return NodeResult.complected(action, new MessageBatch(List.of(new WorkflowMessage(inData))));
@@ -113,17 +125,32 @@ public class HumanApprovalNode implements WorkflowNode {
                 new HashMap<>()
         );
         if (resolvedInput != null) webhookPayload.putAll(resolvedInput);
+        Map<String, Object> outboundPayload = new HashMap<>();
+        String flowId = String.valueOf(inData.getOrDefault("flowId", ""));
+        String sessionId = String.valueOf(inData.getOrDefault("sessionId", ""));
+        String samplePayload = """
+                Sample Payload
+                {
+                    "sessionId": "<<SESSION_ID>>",
+                    "action": "SUCCESS",
+                    "status": "APPROVED || REJECTED",
+                    
+                }
+                """;
+        outboundPayload.put("callbackUrl", getBaseUrl() + "/service/approve/" + flowId);
+        outboundPayload.put("sessionId", sessionId);
+        outboundPayload.put("samplePayload", samplePayload);
 
         String webhookUrl = NodeConfigUtil.getInputProp(config, "outboundWebhookUrl", "");
         if (!webhookUrl.isBlank()) {
             log.info("Sending approval request to: {}", webhookUrl);
             webClient.post()
                     .uri(webhookUrl)
-                    .bodyValue(webhookPayload)
+                    .bodyValue(outboundPayload)
                     .retrieve()
                     .toBodilessEntity()
                     .subscribe(
-                            resp -> log.debug("Approval webhook successfully delivered"),
+                            resp -> log.info("Approval webhook successfully delivered"),
                             err -> log.error("Failed to deliver approval webhook: {}", err.getMessage())
                     );
         }
@@ -133,5 +160,17 @@ public class HumanApprovalNode implements WorkflowNode {
                 "requestSent", webhookPayload,
                 "waitingSince", Instant.now().toString()
         ));
+    }
+
+    private String getBaseUrl() {
+        return "http://" + getHost() + ":" + port;
+    }
+
+    private String getHost() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            return "localhost";
+        }
     }
 }
