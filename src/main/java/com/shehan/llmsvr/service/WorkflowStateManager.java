@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Data
 public class WorkflowStateManager {
 
     private final Map<String, SuspendedState> storage = new ConcurrentHashMap<>();
@@ -18,7 +19,11 @@ public class WorkflowStateManager {
         storage.put(runId, new SuspendedState(wf, ctx));
     }
 
-    public SuspendedState get(String runId) {
+    /**
+     * Retrieves and removes the state for the given runId.
+     * This prevents multiple resume attempts for the same state.
+     */
+    public SuspendedState getAndRemove(String runId) {
         return storage.remove(runId);
     }
 

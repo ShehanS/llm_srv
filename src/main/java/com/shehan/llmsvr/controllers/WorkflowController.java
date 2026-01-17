@@ -1,9 +1,6 @@
 package com.shehan.llmsvr.controllers;
 
-import com.shehan.llmsvr.dtos.ExecutionTrace;
-import com.shehan.llmsvr.dtos.ResponseCode;
-import com.shehan.llmsvr.dtos.ResponseMessage;
-import com.shehan.llmsvr.dtos.Workflow;
+import com.shehan.llmsvr.dtos.*;
 import com.shehan.llmsvr.service.WorkflowEngine;
 import com.shehan.llmsvr.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +32,33 @@ public class WorkflowController {
                                 new ResponseMessage(
                                         ResponseCode.SUCCESS.getCode(),
                                         "Workflow saved successfully",
+                                        res,
+                                        null)
+                        )
+                )
+                .onErrorResume(ex ->
+                        Mono.just(
+                                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .body(
+                                                new ResponseMessage(
+                                                        ResponseCode.ERROR.getCode(),
+                                                        null,
+                                                        ex.getMessage(),
+                                                        "Workflow save failed"
+                                                )
+                                        )
+                        )
+                );
+    }
+
+    @PostMapping("/approval/{runId}/{outputHandle}")
+    public Mono<ResponseEntity<ResponseMessage>> approval(@PathVariable String runId, @RequestBody MessageBatch humanInput, @PathVariable String outputHandle) {
+        return engine.resume(runId, humanInput, outputHandle)
+                .map(res ->
+                        ResponseEntity.ok(
+                                new ResponseMessage(
+                                        ResponseCode.SUCCESS.getCode(),
+                                        "Workflow continue successfully",
                                         res,
                                         null)
                         )

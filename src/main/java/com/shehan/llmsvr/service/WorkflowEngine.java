@@ -10,7 +10,7 @@ public interface WorkflowEngine {
     public Mono<String> run(MessageBatch startMessages, WorkflowDefinition wf, String runId);
 
     public Flux<ExecutionTrace> getTrace(String runId);
-
+    public Mono<String> resume(String runId, MessageBatch humanInput, String outputHandle);
     public Flux<ExecutionTrace> liveTrace(String runId);
 
     Flux<ExecutionTrace> liveNodeTrace(String runId, String nodeId);

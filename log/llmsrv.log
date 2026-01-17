@@ -1611,3 +1611,790 @@ Caused by: java.lang.RuntimeException: Node execution failed
 2026-01-17 07:11:06.891 [boundedElastic-1]  INFO c.s.l.s.i.WorkflowEngineImpl:94 - Workflow finished [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]
 2026-01-17 07:13:35.144 [reactor-http-epoll-3]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
 2026-01-17 07:16:27.193 [boundedElastic-4]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 07:27:05.303 [boundedElastic-11]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 07:27:29.112 [boundedElastic-11]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 07:28:08.677 [boundedElastic-10]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 07:37:36.890 [boundedElastic-13]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 07:54:14.416 [boundedElastic-15]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 07:54:35.735 [SpringApplicationShutdownHook]  INFO o.s.b.r.n.GracefulShutdown:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-17 07:54:35.739 [netty-shutdown]  INFO o.s.b.r.n.GracefulShutdown:64 - Graceful shutdown complete
+2026-01-17 07:54:37.852 [SpringApplicationShutdownHook]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:667 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 07:54:37.859 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:349 - HikariPool-1 - Shutdown initiated...
+2026-01-17 07:54:37.870 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:351 - HikariPool-1 - Shutdown completed.
+2026-01-17 07:54:53.556 [main]  INFO c.s.l.LlmBackendServiceApplication:54 - Starting LlmBackendServiceApplication using Java 17.0.6 with PID 3102056 (/home/shehan/Documents/dev/ML_service/llm/llmsvr/target/classes started by shehan in /home/shehan/Documents/dev/ML_service/llm/llmsvr)
+2026-01-17 07:54:53.564 [main]  INFO c.s.l.LlmBackendServiceApplication:652 - No active profile set, falling back to 1 default profile: "default"
+2026-01-17 07:54:54.937 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:145 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-17 07:54:55.105 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:213 - Finished Spring Data repository scanning in 150 ms. Found 4 JPA repository interfaces.
+2026-01-17 07:54:56.043 [main]  INFO o.h.o.jpa:102 - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-17 07:54:56.143 [main]  INFO o.h.o.core:41 - HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-17 07:54:57.074 [main]  INFO o.s.o.j.p.SpringPersistenceUnitInfo:128 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-17 07:54:57.138 [main]  INFO c.z.h.HikariDataSource:109 - HikariPool-1 - Starting...
+2026-01-17 07:54:57.714 [main]  INFO c.z.h.p.HikariPool:580 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2fa879ed
+2026-01-17 07:54:57.717 [main]  INFO c.z.h.HikariDataSource:122 - HikariPool-1 - Start completed.
+2026-01-17 07:54:57.819 [main]  INFO o.h.o.c.pooling:179 - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/LLM_DB]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: LLM_DB/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-17 07:54:59.153 [main]  INFO o.h.o.core:53 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-17 07:54:59.275 [main]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:444 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 07:54:59.439 [main]  INFO o.s.d.j.r.q.QueryEnhancerFactories:48 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-17 07:55:01.433 [main]  INFO o.s.b.r.n.NettyWebServer:142 - Netty started on port 8080 (http)
+2026-01-17 07:55:01.451 [main]  INFO c.s.l.LlmBackendServiceApplication:60 - Started LlmBackendServiceApplication in 9.591 seconds (process running for 11.402)
+2026-01-17 07:57:07.648 [boundedElastic-2]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 07:57:26.492 [boundedElastic-2]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 08:34:33.221 [boundedElastic-4]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 08:35:48.289 [boundedElastic-5]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 08:36:06.869 [boundedElastic-4]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 08:36:11.203 [reactor-http-epoll-7]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 08:36:31.930 [reactor-http-epoll-7] ERROR c.s.l.c.HttpRouteBuilder:248 - Approval resume error for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+java.lang.IllegalStateException: No suspended workflow found for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+	at com.shehan.llmsvr.service.impl.WorkflowEngineImpl.resume(WorkflowEngineImpl.java:140)
+	at com.shehan.llmsvr.config.HttpRouteBuilder.lambda$handleHumanApprovalRequest$11(HttpRouteBuilder.java:238)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onNext(MonoFlatMap.java:133)
+	at reactor.core.publisher.FluxDefaultIfEmpty$DefaultIfEmptySubscriber.onNext(FluxDefaultIfEmpty.java:123)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onNext(FluxOnErrorResume.java:80)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onNext(FluxOnErrorResume.java:80)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onNext(MonoFlatMap.java:159)
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:109)
+	at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onNext(FluxMapFuseable.java:300)
+	at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onNext(FluxFilterFuseable.java:338)
+	at reactor.core.publisher.Operators$BaseFluxToMonoOperator.completePossiblyEmpty(Operators.java:2093)
+	at reactor.core.publisher.MonoCollect$CollectSubscriber.onComplete(MonoCollect.java:144)
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144)
+	at reactor.core.publisher.FluxPeek$PeekSubscriber.onComplete(FluxPeek.java:263)
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144)
+	at reactor.netty.channel.FluxReceive.onInboundComplete(FluxReceive.java:419)
+	at reactor.netty.channel.ChannelOperations.onInboundComplete(ChannelOperations.java:465)
+	at reactor.netty.http.server.HttpServerOperations.handleLastHttpContent(HttpServerOperations.java:896)
+	at reactor.netty.http.server.HttpServerOperations.onInboundNext(HttpServerOperations.java:805)
+	at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:115)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:356)
+	at reactor.netty.http.server.HttpTrafficHandler.channelRead(HttpTrafficHandler.java:332)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:354)
+	at io.netty.channel.CombinedChannelDuplexHandler$DelegatingChannelHandlerContext.fireChannelRead(CombinedChannelDuplexHandler.java:434)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+	at io.netty.channel.CombinedChannelDuplexHandler.channelRead(CombinedChannelDuplexHandler.java:249)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:354)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1429)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.epoll.AbstractEpollStreamChannel$EpollStreamUnsafe.epollInReady(AbstractEpollStreamChannel.java:804)
+	at io.netty.channel.epoll.AbstractEpollChannel$AbstractEpollUnsafe.handle(AbstractEpollChannel.java:482)
+	at io.netty.channel.epoll.EpollIoHandler$DefaultEpollIoRegistration.handle(EpollIoHandler.java:317)
+	at io.netty.channel.epoll.EpollIoHandler.processReady(EpollIoHandler.java:515)
+	at io.netty.channel.epoll.EpollIoHandler.run(EpollIoHandler.java:460)
+	at io.netty.channel.SingleThreadIoEventLoop.runIo(SingleThreadIoEventLoop.java:225)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:196)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1195)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+2026-01-17 08:36:48.881 [reactor-http-epoll-7]  INFO c.s.l.s.i.WorkflowEngineImpl:37 - Creating new Multicast sink for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:36:48.909 [boundedElastic-6]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=6}
+2026-01-17 08:36:55.664 [boundedElastic-6] ERROR c.s.l.n.AIAgentNode:83 - AI Agent communication failed: 500 Internal Server Error from POST http://localhost:8500/api/v1/chat
+2026-01-17 08:36:55.666 [boundedElastic-6] ERROR c.s.l.s.i.WorkflowEngineImpl:98 - Workflow failed [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]: Node execution failed
+2026-01-17 08:36:55.666 [boundedElastic-6] ERROR r.c.p.Operators:325 - Operator called default onErrorDropped
+reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.RuntimeException: Node execution failed
+Caused by: java.lang.RuntimeException: Node execution failed
+	at com.shehan.llmsvr.service.impl.WorkflowEngineImpl.lambda$executeNode$11(WorkflowEngineImpl.java:123)
+	at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onNext(MonoFlatMapMany.java:165)
+	at reactor.core.publisher.FluxSubscribeOnCallable$CallableSubscribeOnSubscription.run(FluxSubscribeOnCallable.java:254)
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:76)
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+2026-01-17 08:37:11.794 [reactor-http-epoll-7]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 08:37:19.040 [reactor-http-epoll-7] ERROR c.s.l.c.HttpRouteBuilder:248 - Approval resume error for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+java.lang.IllegalStateException: No suspended workflow found for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+	at com.shehan.llmsvr.service.impl.WorkflowEngineImpl.resume(WorkflowEngineImpl.java:140)
+	at com.shehan.llmsvr.config.HttpRouteBuilder.lambda$handleHumanApprovalRequest$11(HttpRouteBuilder.java:238)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onNext(MonoFlatMap.java:133)
+	at reactor.core.publisher.FluxDefaultIfEmpty$DefaultIfEmptySubscriber.onNext(FluxDefaultIfEmpty.java:123)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onNext(FluxOnErrorResume.java:80)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onNext(FluxOnErrorResume.java:80)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onNext(MonoFlatMap.java:159)
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:109)
+	at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onNext(FluxMapFuseable.java:300)
+	at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onNext(FluxFilterFuseable.java:338)
+	at reactor.core.publisher.Operators$BaseFluxToMonoOperator.completePossiblyEmpty(Operators.java:2093)
+	at reactor.core.publisher.MonoCollect$CollectSubscriber.onComplete(MonoCollect.java:144)
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144)
+	at reactor.core.publisher.FluxPeek$PeekSubscriber.onComplete(FluxPeek.java:263)
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144)
+	at reactor.netty.channel.FluxReceive.onInboundComplete(FluxReceive.java:419)
+	at reactor.netty.channel.ChannelOperations.onInboundComplete(ChannelOperations.java:465)
+	at reactor.netty.http.server.HttpServerOperations.handleLastHttpContent(HttpServerOperations.java:896)
+	at reactor.netty.http.server.HttpServerOperations.onInboundNext(HttpServerOperations.java:805)
+	at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:115)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:356)
+	at reactor.netty.http.server.HttpTrafficHandler.channelRead(HttpTrafficHandler.java:332)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:354)
+	at io.netty.channel.CombinedChannelDuplexHandler$DelegatingChannelHandlerContext.fireChannelRead(CombinedChannelDuplexHandler.java:434)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+	at io.netty.channel.CombinedChannelDuplexHandler.channelRead(CombinedChannelDuplexHandler.java:249)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:354)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1429)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.epoll.AbstractEpollStreamChannel$EpollStreamUnsafe.epollInReady(AbstractEpollStreamChannel.java:804)
+	at io.netty.channel.epoll.AbstractEpollChannel$AbstractEpollUnsafe.handle(AbstractEpollChannel.java:482)
+	at io.netty.channel.epoll.EpollIoHandler$DefaultEpollIoRegistration.handle(EpollIoHandler.java:317)
+	at io.netty.channel.epoll.EpollIoHandler.processReady(EpollIoHandler.java:515)
+	at io.netty.channel.epoll.EpollIoHandler.run(EpollIoHandler.java:460)
+	at io.netty.channel.SingleThreadIoEventLoop.runIo(SingleThreadIoEventLoop.java:225)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:196)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1195)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+2026-01-17 08:37:50.929 [reactor-http-epoll-7]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 08:37:50.930 [reactor-http-epoll-7] ERROR c.s.l.c.HttpRouteBuilder:248 - Approval resume error for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+java.lang.IllegalStateException: No suspended workflow found for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+	at com.shehan.llmsvr.service.impl.WorkflowEngineImpl.resume(WorkflowEngineImpl.java:140)
+	at com.shehan.llmsvr.config.HttpRouteBuilder.lambda$handleHumanApprovalRequest$11(HttpRouteBuilder.java:238)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onNext(MonoFlatMap.java:133)
+	at reactor.core.publisher.FluxDefaultIfEmpty$DefaultIfEmptySubscriber.onNext(FluxDefaultIfEmpty.java:123)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onNext(FluxOnErrorResume.java:80)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onNext(FluxOnErrorResume.java:80)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onNext(MonoFlatMap.java:159)
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:109)
+	at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onNext(FluxMapFuseable.java:300)
+	at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onNext(FluxFilterFuseable.java:338)
+	at reactor.core.publisher.Operators$BaseFluxToMonoOperator.completePossiblyEmpty(Operators.java:2093)
+	at reactor.core.publisher.MonoCollect$CollectSubscriber.onComplete(MonoCollect.java:144)
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144)
+	at reactor.core.publisher.FluxPeek$PeekSubscriber.onComplete(FluxPeek.java:263)
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144)
+	at reactor.netty.channel.FluxReceive.onInboundComplete(FluxReceive.java:419)
+	at reactor.netty.channel.ChannelOperations.onInboundComplete(ChannelOperations.java:465)
+	at reactor.netty.http.server.HttpServerOperations.handleLastHttpContent(HttpServerOperations.java:896)
+	at reactor.netty.http.server.HttpServerOperations.onInboundNext(HttpServerOperations.java:805)
+	at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:115)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:356)
+	at reactor.netty.http.server.HttpTrafficHandler.channelRead(HttpTrafficHandler.java:332)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:354)
+	at io.netty.channel.CombinedChannelDuplexHandler$DelegatingChannelHandlerContext.fireChannelRead(CombinedChannelDuplexHandler.java:434)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+	at io.netty.channel.CombinedChannelDuplexHandler.channelRead(CombinedChannelDuplexHandler.java:249)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:354)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1429)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.epoll.AbstractEpollStreamChannel$EpollStreamUnsafe.epollInReady(AbstractEpollStreamChannel.java:804)
+	at io.netty.channel.epoll.AbstractEpollChannel$AbstractEpollUnsafe.handle(AbstractEpollChannel.java:482)
+	at io.netty.channel.epoll.EpollIoHandler$DefaultEpollIoRegistration.handle(EpollIoHandler.java:317)
+	at io.netty.channel.epoll.EpollIoHandler.processReady(EpollIoHandler.java:515)
+	at io.netty.channel.epoll.EpollIoHandler.run(EpollIoHandler.java:460)
+	at io.netty.channel.SingleThreadIoEventLoop.runIo(SingleThreadIoEventLoop.java:225)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:196)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1195)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+2026-01-17 08:39:57.284 [boundedElastic-9]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=6}
+2026-01-17 08:40:01.609 [boundedElastic-9] ERROR c.s.l.n.AIAgentNode:83 - AI Agent communication failed: 500 Internal Server Error from POST http://localhost:8500/api/v1/chat
+2026-01-17 08:40:01.610 [boundedElastic-9] ERROR c.s.l.s.i.WorkflowEngineImpl:98 - Workflow failed [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]: Node execution failed
+2026-01-17 08:40:01.610 [boundedElastic-9] ERROR r.c.p.Operators:325 - Operator called default onErrorDropped
+reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.RuntimeException: Node execution failed
+Caused by: java.lang.RuntimeException: Node execution failed
+	at com.shehan.llmsvr.service.impl.WorkflowEngineImpl.lambda$executeNode$11(WorkflowEngineImpl.java:123)
+	at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onNext(MonoFlatMapMany.java:165)
+	at reactor.core.publisher.FluxSubscribeOnCallable$CallableSubscribeOnSubscription.run(FluxSubscribeOnCallable.java:254)
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:76)
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+2026-01-17 08:40:20.551 [boundedElastic-8]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=10}
+2026-01-17 08:40:28.385 [boundedElastic-7]  INFO c.s.l.s.i.WorkflowEngineImpl:116 - Node 21f28177-81d1-48da-bd95-5de07e4934cb is waiting for approval. Suspending run 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:40:28.388 [boundedElastic-7]  INFO c.s.l.s.i.WorkflowEngineImpl:94 - Workflow finished [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]
+2026-01-17 08:40:39.842 [reactor-http-epoll-4]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 08:40:39.843 [reactor-http-epoll-4]  INFO c.s.l.s.i.WorkflowEngineImpl:145 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 from node: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 08:41:26.169 [reactor-http-epoll-3]  INFO c.s.l.s.i.WorkflowEngineImpl:74 - WS Subscriber joined liveTrace: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:41:55.039 [boundedElastic-9]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 08:42:05.118 [reactor-http-epoll-5]  INFO c.s.l.s.i.WorkflowEngineImpl:74 - WS Subscriber joined liveTrace: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:43:05.109 [reactor-http-epoll-3]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:44:46.904 [reactor-http-epoll-6]  INFO c.s.l.s.i.WorkflowEngineImpl:74 - WS Subscriber joined liveTrace: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:45:10.479 [reactor-http-epoll-7]  INFO c.s.l.s.i.WorkflowEngineImpl:74 - WS Subscriber joined liveTrace: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:45:12.978 [boundedElastic-12]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=11}
+2026-01-17 08:45:21.729 [boundedElastic-11]  INFO c.s.l.s.i.WorkflowEngineImpl:116 - Node 21f28177-81d1-48da-bd95-5de07e4934cb is waiting for approval. Suspending run 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:45:21.732 [boundedElastic-11]  INFO c.s.l.s.i.WorkflowEngineImpl:94 - Workflow finished [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]
+2026-01-17 08:45:37.454 [reactor-http-epoll-1]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 08:45:37.454 [reactor-http-epoll-1]  INFO c.s.l.s.i.WorkflowEngineImpl:145 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 from node: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 08:45:37.456 [boundedElastic-10]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 08:46:06.066 [reactor-http-epoll-5]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:46:06.068 [boundedElastic-10]  INFO c.s.l.s.i.WorkflowEngineImpl:94 - Workflow finished [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]
+2026-01-17 08:46:10.470 [reactor-http-epoll-6]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:46:16.780 [boundedElastic-12]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=12}
+2026-01-17 08:46:20.039 [boundedElastic-11]  INFO c.s.l.s.i.WorkflowEngineImpl:116 - Node 21f28177-81d1-48da-bd95-5de07e4934cb is waiting for approval. Suspending run 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:46:20.040 [boundedElastic-11]  INFO c.s.l.s.i.WorkflowEngineImpl:94 - Workflow finished [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]
+2026-01-17 08:46:29.519 [reactor-http-epoll-1]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 08:46:29.520 [reactor-http-epoll-1]  INFO c.s.l.s.i.WorkflowEngineImpl:145 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 from node: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 08:46:29.521 [boundedElastic-10]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 08:46:33.638 [boundedElastic-10]  INFO c.s.l.s.i.WorkflowEngineImpl:94 - Workflow finished [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]
+2026-01-17 08:47:44.126 [boundedElastic-12]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=13}
+2026-01-17 08:47:47.442 [boundedElastic-11]  INFO c.s.l.s.i.WorkflowEngineImpl:116 - Node 21f28177-81d1-48da-bd95-5de07e4934cb is waiting for approval. Suspending run 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:47:47.443 [boundedElastic-11]  INFO c.s.l.s.i.WorkflowEngineImpl:94 - Workflow finished [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]
+2026-01-17 08:47:51.848 [reactor-http-epoll-6]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 08:47:51.850 [reactor-http-epoll-6]  INFO c.s.l.s.i.WorkflowEngineImpl:145 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 from node: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 08:47:51.852 [boundedElastic-10]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 08:50:15.034 [HikariPool-1:housekeeper]  WARN c.z.h.p.HikariPool:825 - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2m38s972ms106µs97ns).
+2026-01-17 08:50:15.036 [boundedElastic-10]  INFO c.s.l.s.i.WorkflowEngineImpl:94 - Workflow finished [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]
+2026-01-17 08:50:24.249 [reactor-http-epoll-7]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:50:29.981 [reactor-http-epoll-2]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 08:50:29.982 [reactor-http-epoll-2] ERROR c.s.l.c.HttpRouteBuilder:248 - Approval resume error for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+java.lang.IllegalStateException: No suspended workflow found for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+	at com.shehan.llmsvr.service.impl.WorkflowEngineImpl.resume(WorkflowEngineImpl.java:140)
+	at com.shehan.llmsvr.config.HttpRouteBuilder.lambda$handleHumanApprovalRequest$11(HttpRouteBuilder.java:238)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onNext(MonoFlatMap.java:133)
+	at reactor.core.publisher.FluxDefaultIfEmpty$DefaultIfEmptySubscriber.onNext(FluxDefaultIfEmpty.java:123)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onNext(FluxOnErrorResume.java:80)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onNext(FluxOnErrorResume.java:80)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onNext(MonoFlatMap.java:159)
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:109)
+	at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onNext(FluxMapFuseable.java:300)
+	at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onNext(FluxFilterFuseable.java:338)
+	at reactor.core.publisher.Operators$BaseFluxToMonoOperator.completePossiblyEmpty(Operators.java:2093)
+	at reactor.core.publisher.MonoCollect$CollectSubscriber.onComplete(MonoCollect.java:144)
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144)
+	at reactor.core.publisher.FluxPeek$PeekSubscriber.onComplete(FluxPeek.java:263)
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144)
+	at reactor.netty.channel.FluxReceive.onInboundComplete(FluxReceive.java:419)
+	at reactor.netty.channel.ChannelOperations.onInboundComplete(ChannelOperations.java:465)
+	at reactor.netty.http.server.HttpServerOperations.handleLastHttpContent(HttpServerOperations.java:896)
+	at reactor.netty.http.server.HttpServerOperations.onInboundNext(HttpServerOperations.java:805)
+	at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:115)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:356)
+	at reactor.netty.http.server.HttpTrafficHandler.channelRead(HttpTrafficHandler.java:332)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:354)
+	at io.netty.channel.CombinedChannelDuplexHandler$DelegatingChannelHandlerContext.fireChannelRead(CombinedChannelDuplexHandler.java:434)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+	at io.netty.channel.CombinedChannelDuplexHandler.channelRead(CombinedChannelDuplexHandler.java:249)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:354)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1429)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.epoll.AbstractEpollStreamChannel$EpollStreamUnsafe.epollInReady(AbstractEpollStreamChannel.java:804)
+	at io.netty.channel.epoll.AbstractEpollChannel$AbstractEpollUnsafe.handle(AbstractEpollChannel.java:482)
+	at io.netty.channel.epoll.EpollIoHandler$DefaultEpollIoRegistration.handle(EpollIoHandler.java:317)
+	at io.netty.channel.epoll.EpollIoHandler.processReady(EpollIoHandler.java:515)
+	at io.netty.channel.epoll.EpollIoHandler.run(EpollIoHandler.java:460)
+	at io.netty.channel.SingleThreadIoEventLoop.runIo(SingleThreadIoEventLoop.java:225)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:196)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1195)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+2026-01-17 08:50:35.125 [boundedElastic-13]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=13}
+2026-01-17 08:50:38.184 [boundedElastic-13] ERROR c.s.l.n.AIAgentNode:83 - AI Agent communication failed: 500 Internal Server Error from POST http://localhost:8500/api/v1/chat
+2026-01-17 08:50:38.185 [boundedElastic-13] ERROR c.s.l.s.i.WorkflowEngineImpl:98 - Workflow failed [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]: Node execution failed
+2026-01-17 08:50:38.185 [boundedElastic-13] ERROR r.c.p.Operators:325 - Operator called default onErrorDropped
+reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.RuntimeException: Node execution failed
+Caused by: java.lang.RuntimeException: Node execution failed
+	at com.shehan.llmsvr.service.impl.WorkflowEngineImpl.lambda$executeNode$11(WorkflowEngineImpl.java:123)
+	at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onNext(MonoFlatMapMany.java:165)
+	at reactor.core.publisher.FluxSubscribeOnCallable$CallableSubscribeOnSubscription.run(FluxSubscribeOnCallable.java:254)
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:76)
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+2026-01-17 08:50:42.676 [reactor-http-epoll-5]  INFO c.s.l.s.i.WorkflowEngineImpl:74 - WS Subscriber joined liveTrace: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:50:50.276 [boundedElastic-11]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=14}
+2026-01-17 08:50:56.287 [boundedElastic-10]  INFO c.s.l.s.i.WorkflowEngineImpl:116 - Node 21f28177-81d1-48da-bd95-5de07e4934cb is waiting for approval. Suspending run 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 08:50:56.288 [boundedElastic-10]  INFO c.s.l.s.i.WorkflowEngineImpl:94 - Workflow finished [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]
+2026-01-17 08:51:05.887 [reactor-http-epoll-2]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 08:51:05.888 [reactor-http-epoll-2]  INFO c.s.l.s.i.WorkflowEngineImpl:145 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 from node: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 08:51:05.900 [boundedElastic-13]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 09:02:25.237 [HikariPool-1:housekeeper]  WARN c.z.h.p.HikariPool:825 - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=11m40s202ms507µs289ns).
+2026-01-17 09:02:25.239 [reactor-http-epoll-5]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:02:25.242 [boundedElastic-13]  INFO c.s.l.s.i.WorkflowEngineImpl:94 - Workflow finished [runId=1ebe29c3-4777-409c-8bcb-33e77f8e5313]
+2026-01-17 09:02:25.287 [SpringApplicationShutdownHook]  INFO o.s.b.r.n.GracefulShutdown:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-17 09:02:25.291 [netty-shutdown]  INFO o.s.b.r.n.GracefulShutdown:64 - Graceful shutdown complete
+2026-01-17 09:02:27.323 [SpringApplicationShutdownHook]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:667 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 09:02:27.327 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:349 - HikariPool-1 - Shutdown initiated...
+2026-01-17 09:02:27.334 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:351 - HikariPool-1 - Shutdown completed.
+2026-01-17 09:02:46.344 [main]  INFO c.s.l.LlmBackendServiceApplication:54 - Starting LlmBackendServiceApplication using Java 17.0.6 with PID 3779668 (/home/shehan/Documents/dev/ML_service/llm/llmsvr/target/classes started by shehan in /home/shehan/Documents/dev/ML_service/llm/llmsvr)
+2026-01-17 09:02:46.355 [main]  INFO c.s.l.LlmBackendServiceApplication:652 - No active profile set, falling back to 1 default profile: "default"
+2026-01-17 09:02:47.122 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:145 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-17 09:02:47.266 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:213 - Finished Spring Data repository scanning in 131 ms. Found 4 JPA repository interfaces.
+2026-01-17 09:02:47.927 [main]  INFO o.h.o.jpa:102 - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-17 09:02:47.996 [main]  INFO o.h.o.core:41 - HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-17 09:02:48.663 [main]  INFO o.s.o.j.p.SpringPersistenceUnitInfo:128 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-17 09:02:48.701 [main]  INFO c.z.h.HikariDataSource:109 - HikariPool-1 - Starting...
+2026-01-17 09:02:49.131 [main]  INFO c.z.h.p.HikariPool:580 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3ec082a1
+2026-01-17 09:02:49.133 [main]  INFO c.z.h.HikariDataSource:122 - HikariPool-1 - Start completed.
+2026-01-17 09:02:49.223 [main]  INFO o.h.o.c.pooling:179 - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/LLM_DB]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: LLM_DB/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-17 09:02:50.504 [main]  INFO o.h.o.core:53 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-17 09:02:50.613 [main]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:444 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 09:02:50.745 [main]  INFO o.s.d.j.r.q.QueryEnhancerFactories:48 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-17 09:02:52.354 [main]  INFO o.s.b.r.n.NettyWebServer:142 - Netty started on port 8080 (http)
+2026-01-17 09:02:52.362 [main]  INFO c.s.l.LlmBackendServiceApplication:60 - Started LlmBackendServiceApplication in 7.175 seconds (process running for 8.373)
+2026-01-17 09:02:58.345 [boundedElastic-2]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 09:03:12.037 [boundedElastic-3]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=15}
+2026-01-17 09:03:15.340 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:03:21.106 [reactor-http-epoll-4]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 09:03:21.109 [boundedElastic-1]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 09:03:46.496 [boundedElastic-1]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:04:13.323 [boundedElastic-3]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=16}
+2026-01-17 09:04:17.057 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:04:33.397 [boundedElastic-3]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=16}
+2026-01-17 09:04:36.270 [boundedElastic-3] ERROR c.s.l.n.AIAgentNode:83 - AI Agent communication failed: 500 Internal Server Error from POST http://localhost:8500/api/v1/chat
+2026-01-17 09:04:36.278 [boundedElastic-3] ERROR c.s.l.s.i.WorkflowEngineImpl:68 - Workflow failed for runId 1ebe29c3-4777-409c-8bcb-33e77f8e5313: Node returned error status
+2026-01-17 09:04:36.282 [boundedElastic-3] ERROR r.c.p.Operators:325 - Operator called default onErrorDropped
+reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.RuntimeException: Node returned error status
+Caused by: java.lang.RuntimeException: Node returned error status
+	at com.shehan.llmsvr.service.impl.WorkflowEngineImpl.lambda$executeNode$5(WorkflowEngineImpl.java:95)
+	at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onNext(MonoFlatMapMany.java:165)
+	at reactor.core.publisher.FluxSubscribeOnCallable$CallableSubscribeOnSubscription.run(FluxSubscribeOnCallable.java:254)
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:76)
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+2026-01-17 09:04:45.375 [boundedElastic-1]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=17}
+2026-01-17 09:04:48.854 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:04:56.857 [reactor-http-epoll-3]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:05:01.127 [boundedElastic-1]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=18}
+2026-01-17 09:05:03.754 [boundedElastic-3]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:05:09.749 [reactor-http-epoll-4]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 09:05:09.751 [boundedElastic-2]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 09:05:12.492 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:05:57.209 [reactor-http-epoll-5]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:08:30.106 [SpringApplicationShutdownHook]  INFO o.s.b.r.n.GracefulShutdown:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-17 09:09:00.113 [SpringApplicationShutdownHook]  INFO o.s.c.s.DefaultLifecycleProcessor:657 - Shutdown phase 2147482623 ends with 1 bean still running after timeout of 30000ms: [webServerGracefulShutdown]
+2026-01-17 09:09:00.115 [netty-shutdown]  INFO o.s.b.r.n.GracefulShutdown:68 - Graceful shutdown aborted with one or more requests still active
+2026-01-17 09:09:00.115 [reactor-http-epoll-3]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:09:02.130 [SpringApplicationShutdownHook]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:667 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 09:09:02.133 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:349 - HikariPool-1 - Shutdown initiated...
+2026-01-17 09:09:02.142 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:351 - HikariPool-1 - Shutdown completed.
+2026-01-17 09:09:12.254 [main]  INFO c.s.l.LlmBackendServiceApplication:54 - Starting LlmBackendServiceApplication using Java 17.0.6 with PID 3850648 (/home/shehan/Documents/dev/ML_service/llm/llmsvr/target/classes started by shehan in /home/shehan/Documents/dev/ML_service/llm/llmsvr)
+2026-01-17 09:09:12.265 [main]  INFO c.s.l.LlmBackendServiceApplication:652 - No active profile set, falling back to 1 default profile: "default"
+2026-01-17 09:09:13.107 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:145 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-17 09:09:13.241 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:213 - Finished Spring Data repository scanning in 120 ms. Found 4 JPA repository interfaces.
+2026-01-17 09:09:13.938 [main]  INFO o.h.o.jpa:102 - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-17 09:09:14.040 [main]  INFO o.h.o.core:41 - HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-17 09:09:14.682 [main]  INFO o.s.o.j.p.SpringPersistenceUnitInfo:128 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-17 09:09:14.717 [main]  INFO c.z.h.HikariDataSource:109 - HikariPool-1 - Starting...
+2026-01-17 09:09:15.203 [main]  INFO c.z.h.p.HikariPool:580 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3ec082a1
+2026-01-17 09:09:15.207 [main]  INFO c.z.h.HikariDataSource:122 - HikariPool-1 - Start completed.
+2026-01-17 09:09:15.322 [main]  INFO o.h.o.c.pooling:179 - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/LLM_DB]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: LLM_DB/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-17 09:09:16.651 [main]  INFO o.h.o.core:53 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-17 09:09:16.761 [main]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:444 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 09:09:16.905 [main]  INFO o.s.d.j.r.q.QueryEnhancerFactories:48 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-17 09:09:18.579 [main]  INFO o.s.b.r.n.NettyWebServer:142 - Netty started on port 8080 (http)
+2026-01-17 09:09:18.590 [main]  INFO c.s.l.LlmBackendServiceApplication:60 - Started LlmBackendServiceApplication in 7.404 seconds (process running for 8.957)
+2026-01-17 09:12:02.690 [boundedElastic-2]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 09:12:14.497 [boundedElastic-3]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=19}
+2026-01-17 09:12:22.291 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:12:28.927 [reactor-http-epoll-4]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 09:12:28.931 [boundedElastic-1]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 09:12:37.339 [boundedElastic-1]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 09:13:00.030 [boundedElastic-2]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 09:14:55.031 [reactor-http-epoll-3]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 11:32:55.160 [boundedElastic-5]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 11:33:22.132 [boundedElastic-6]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=20}
+2026-01-17 11:33:33.870 [boundedElastic-5]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 11:33:54.786 [reactor-http-epoll-2]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 11:33:54.788 [boundedElastic-4]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 11:33:58.707 [boundedElastic-4]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 11:34:08.509 [reactor-http-epoll-2]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 11:34:08.514 [reactor-http-epoll-2] ERROR c.s.l.c.HttpRouteBuilder:248 - Approval resume error for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+java.lang.IllegalStateException: No suspended workflow found for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+	at com.shehan.llmsvr.service.impl.WorkflowEngineImpl.resume(WorkflowEngineImpl.java:47)
+	at com.shehan.llmsvr.config.HttpRouteBuilder.lambda$handleHumanApprovalRequest$11(HttpRouteBuilder.java:238)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onNext(MonoFlatMap.java:133)
+	at reactor.core.publisher.FluxDefaultIfEmpty$DefaultIfEmptySubscriber.onNext(FluxDefaultIfEmpty.java:123)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onNext(FluxOnErrorResume.java:80)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onNext(FluxOnErrorResume.java:80)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onNext(MonoFlatMap.java:159)
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:109)
+	at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onNext(FluxMapFuseable.java:300)
+	at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onNext(FluxFilterFuseable.java:338)
+	at reactor.core.publisher.Operators$BaseFluxToMonoOperator.completePossiblyEmpty(Operators.java:2093)
+	at reactor.core.publisher.MonoCollect$CollectSubscriber.onComplete(MonoCollect.java:144)
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144)
+	at reactor.core.publisher.FluxPeek$PeekSubscriber.onComplete(FluxPeek.java:263)
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144)
+	at reactor.netty.channel.FluxReceive.onInboundComplete(FluxReceive.java:419)
+	at reactor.netty.channel.ChannelOperations.onInboundComplete(ChannelOperations.java:465)
+	at reactor.netty.http.server.HttpServerOperations.handleLastHttpContent(HttpServerOperations.java:896)
+	at reactor.netty.http.server.HttpServerOperations.onInboundNext(HttpServerOperations.java:805)
+	at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:115)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:356)
+	at reactor.netty.http.server.HttpTrafficHandler.channelRead(HttpTrafficHandler.java:332)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:354)
+	at io.netty.channel.CombinedChannelDuplexHandler$DelegatingChannelHandlerContext.fireChannelRead(CombinedChannelDuplexHandler.java:434)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+	at io.netty.channel.CombinedChannelDuplexHandler.channelRead(CombinedChannelDuplexHandler.java:249)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:354)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1429)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.epoll.AbstractEpollStreamChannel$EpollStreamUnsafe.epollInReady(AbstractEpollStreamChannel.java:804)
+	at io.netty.channel.epoll.AbstractEpollChannel$AbstractEpollUnsafe.handle(AbstractEpollChannel.java:482)
+	at io.netty.channel.epoll.EpollIoHandler$DefaultEpollIoRegistration.handle(EpollIoHandler.java:317)
+	at io.netty.channel.epoll.EpollIoHandler.processReady(EpollIoHandler.java:515)
+	at io.netty.channel.epoll.EpollIoHandler.run(EpollIoHandler.java:460)
+	at io.netty.channel.SingleThreadIoEventLoop.runIo(SingleThreadIoEventLoop.java:225)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:196)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1195)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+2026-01-17 11:34:28.141 [boundedElastic-6]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=21}
+2026-01-17 11:35:17.184 [HikariPool-1:housekeeper]  WARN c.z.h.p.HikariPool:825 - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m1s826ms897µs376ns).
+2026-01-17 11:35:17.189 [boundedElastic-5]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 11:35:35.568 [reactor-http-epoll-2]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 11:36:53.380 [HikariPool-1:housekeeper]  WARN c.z.h.p.HikariPool:825 - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=55s374ms224µs341ns).
+2026-01-17 11:36:53.384 [reactor-http-epoll-7]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 11:36:57.767 [boundedElastic-8]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 11:37:14.971 [boundedElastic-8]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 11:40:56.538 [SpringApplicationShutdownHook]  INFO o.s.b.r.n.GracefulShutdown:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-17 11:40:56.541 [netty-shutdown]  INFO o.s.b.r.n.GracefulShutdown:64 - Graceful shutdown complete
+2026-01-17 11:40:58.577 [SpringApplicationShutdownHook]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:667 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 11:40:58.584 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:349 - HikariPool-1 - Shutdown initiated...
+2026-01-17 11:40:58.596 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:351 - HikariPool-1 - Shutdown completed.
+2026-01-17 11:41:07.032 [main]  INFO c.s.l.LlmBackendServiceApplication:54 - Starting LlmBackendServiceApplication using Java 17.0.6 with PID 1286170 (/home/shehan/Documents/dev/ML_service/llm/llmsvr/target/classes started by shehan in /home/shehan/Documents/dev/ML_service/llm/llmsvr)
+2026-01-17 11:41:07.040 [main]  INFO c.s.l.LlmBackendServiceApplication:652 - No active profile set, falling back to 1 default profile: "default"
+2026-01-17 11:41:07.893 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:145 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-17 11:41:08.020 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:213 - Finished Spring Data repository scanning in 113 ms. Found 4 JPA repository interfaces.
+2026-01-17 11:41:08.703 [main]  INFO o.h.o.jpa:102 - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-17 11:41:08.778 [main]  INFO o.h.o.core:41 - HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-17 11:41:09.355 [main]  INFO o.s.o.j.p.SpringPersistenceUnitInfo:128 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-17 11:41:09.402 [main]  INFO c.z.h.HikariDataSource:109 - HikariPool-1 - Starting...
+2026-01-17 11:41:09.867 [main]  INFO c.z.h.p.HikariPool:580 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3ec082a1
+2026-01-17 11:41:09.870 [main]  INFO c.z.h.HikariDataSource:122 - HikariPool-1 - Start completed.
+2026-01-17 11:41:09.962 [main]  INFO o.h.o.c.pooling:179 - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/LLM_DB]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: LLM_DB/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-17 11:41:11.166 [main]  INFO o.h.o.core:53 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-17 11:41:11.284 [main]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:444 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 11:41:11.448 [main]  INFO o.s.d.j.r.q.QueryEnhancerFactories:48 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-17 11:41:13.175 [main]  INFO o.s.b.r.n.NettyWebServer:142 - Netty started on port 8080 (http)
+2026-01-17 11:41:13.183 [main]  INFO c.s.l.LlmBackendServiceApplication:60 - Started LlmBackendServiceApplication in 7.311 seconds (process running for 8.712)
+2026-01-17 11:42:05.042 [SpringApplicationShutdownHook]  INFO o.s.b.r.n.GracefulShutdown:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-17 11:42:05.057 [netty-shutdown]  INFO o.s.b.r.n.GracefulShutdown:64 - Graceful shutdown complete
+2026-01-17 11:42:07.091 [SpringApplicationShutdownHook]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:667 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 11:42:07.094 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:349 - HikariPool-1 - Shutdown initiated...
+2026-01-17 11:42:07.104 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:351 - HikariPool-1 - Shutdown completed.
+2026-01-17 11:57:16.083 [main]  INFO c.s.l.LlmBackendServiceApplication:54 - Starting LlmBackendServiceApplication using Java 17.0.6 with PID 1457947 (/home/shehan/Documents/dev/ML_service/llm/llmsvr/target/classes started by shehan in /home/shehan/Documents/dev/ML_service/llm/llmsvr)
+2026-01-17 11:57:16.099 [main]  INFO c.s.l.LlmBackendServiceApplication:652 - No active profile set, falling back to 1 default profile: "default"
+2026-01-17 11:57:17.914 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:145 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-17 11:57:18.137 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:213 - Finished Spring Data repository scanning in 203 ms. Found 4 JPA repository interfaces.
+2026-01-17 11:57:19.118 [main]  INFO o.h.o.jpa:102 - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-17 11:57:19.205 [main]  INFO o.h.o.core:41 - HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-17 11:57:19.834 [main]  INFO o.s.o.j.p.SpringPersistenceUnitInfo:128 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-17 11:57:19.880 [main]  INFO c.z.h.HikariDataSource:109 - HikariPool-1 - Starting...
+2026-01-17 11:57:20.369 [main]  INFO c.z.h.p.HikariPool:580 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@60a4e619
+2026-01-17 11:57:20.371 [main]  INFO c.z.h.HikariDataSource:122 - HikariPool-1 - Start completed.
+2026-01-17 11:57:20.461 [main]  INFO o.h.o.c.pooling:179 - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/LLM_DB]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: LLM_DB/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-17 11:57:21.633 [main]  INFO o.h.o.core:53 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-17 11:57:21.738 [main]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:444 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 11:57:21.882 [main]  INFO o.s.d.j.r.q.QueryEnhancerFactories:48 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-17 11:57:23.551 [main]  INFO o.s.b.r.n.NettyWebServer:142 - Netty started on port 8080 (http)
+2026-01-17 11:57:23.561 [main]  INFO c.s.l.LlmBackendServiceApplication:60 - Started LlmBackendServiceApplication in 8.818 seconds (process running for 11.263)
+2026-01-17 11:57:23.569 [main]  INFO c.s.l.s.NodeJsRunner:21 - Checking Node.js version...
+2026-01-17 11:57:35.461 [boundedElastic-2]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 11:57:44.783 [boundedElastic-3]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=21}
+2026-01-17 11:57:54.874 [boundedElastic-2]  INFO c.s.l.n.HumanApprovalNode:88 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 11:57:54.880 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 11:57:54.897 [reactor-http-epoll-2] ERROR c.s.l.n.HumanApprovalNode:96 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 11:58:22.659 [reactor-http-epoll-5]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 11:58:22.663 [reactor-http-epoll-5]  INFO c.s.l.s.i.WorkflowEngineImpl:55 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 by re-executing HumanApprovalNode: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 11:58:32.871 [boundedElastic-1]  INFO c.s.l.n.HumanApprovalNode:46 - Internal Resume Processing: Human chose action [success]
+2026-01-17 11:58:51.782 [boundedElastic-3]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 11:59:06.804 [boundedElastic-3]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:00:25.117 [reactor-http-epoll-4]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:23:12.997 [SpringApplicationShutdownHook]  INFO o.s.b.r.n.GracefulShutdown:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-17 12:23:13.000 [netty-shutdown]  INFO o.s.b.r.n.GracefulShutdown:64 - Graceful shutdown complete
+2026-01-17 12:23:15.031 [SpringApplicationShutdownHook]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:667 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 12:23:15.036 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:349 - HikariPool-1 - Shutdown initiated...
+2026-01-17 12:23:15.051 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:351 - HikariPool-1 - Shutdown completed.
+2026-01-17 12:23:22.102 [main]  INFO c.s.l.LlmBackendServiceApplication:54 - Starting LlmBackendServiceApplication using Java 17.0.6 with PID 1734850 (/home/shehan/Documents/dev/ML_service/llm/llmsvr/target/classes started by shehan in /home/shehan/Documents/dev/ML_service/llm/llmsvr)
+2026-01-17 12:23:22.109 [main]  INFO c.s.l.LlmBackendServiceApplication:652 - No active profile set, falling back to 1 default profile: "default"
+2026-01-17 12:23:22.954 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:145 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-17 12:23:23.100 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:213 - Finished Spring Data repository scanning in 129 ms. Found 4 JPA repository interfaces.
+2026-01-17 12:23:23.771 [main]  INFO o.h.o.jpa:102 - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-17 12:23:23.865 [main]  INFO o.h.o.core:41 - HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-17 12:23:24.634 [main]  INFO o.s.o.j.p.SpringPersistenceUnitInfo:128 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-17 12:23:24.676 [main]  INFO c.z.h.HikariDataSource:109 - HikariPool-1 - Starting...
+2026-01-17 12:23:25.227 [main]  INFO c.z.h.p.HikariPool:580 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@16b7e04a
+2026-01-17 12:23:25.230 [main]  INFO c.z.h.HikariDataSource:122 - HikariPool-1 - Start completed.
+2026-01-17 12:23:25.315 [main]  INFO o.h.o.c.pooling:179 - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/LLM_DB]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: LLM_DB/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-17 12:23:26.504 [main]  INFO o.h.o.core:53 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-17 12:23:26.606 [main]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:444 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 12:23:26.725 [main]  INFO o.s.d.j.r.q.QueryEnhancerFactories:48 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-17 12:23:28.540 [main]  INFO o.s.b.r.n.NettyWebServer:142 - Netty started on port 8080 (http)
+2026-01-17 12:23:28.556 [main]  INFO c.s.l.LlmBackendServiceApplication:60 - Started LlmBackendServiceApplication in 7.445 seconds (process running for 8.654)
+2026-01-17 12:23:28.581 [main]  INFO c.s.l.s.NodeJsRunner:21 - Checking Node.js version...
+2026-01-17 12:23:43.279 [boundedElastic-2]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 12:23:58.472 [boundedElastic-3]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=1}
+2026-01-17 12:24:08.429 [boundedElastic-2]  INFO c.s.l.n.HumanApprovalNode:96 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 12:24:08.444 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:24:08.517 [reactor-http-epoll-2] ERROR c.s.l.n.HumanApprovalNode:104 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 12:24:44.111 [reactor-http-epoll-4]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 12:24:44.112 [reactor-http-epoll-4]  INFO c.s.l.s.i.WorkflowEngineImpl:55 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 by re-executing HumanApprovalNode: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 12:24:56.797 [boundedElastic-1]  INFO c.s.l.n.HumanApprovalNode:96 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 12:24:56.805 [reactor-http-epoll-6] ERROR c.s.l.n.HumanApprovalNode:104 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 12:24:56.805 [boundedElastic-1]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:25:29.221 [boundedElastic-4]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=2}
+2026-01-17 12:25:42.523 [boundedElastic-2]  INFO c.s.l.n.HumanApprovalNode:96 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 12:25:42.525 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:25:42.527 [reactor-http-epoll-4] ERROR c.s.l.n.HumanApprovalNode:104 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 12:26:11.772 [reactor-http-epoll-4]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 12:26:11.789 [reactor-http-epoll-4]  INFO c.s.l.s.i.WorkflowEngineImpl:55 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 by re-executing HumanApprovalNode: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 12:26:19.381 [reactor-http-epoll-5]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:26:49.877 [HikariPool-1:housekeeper]  WARN c.z.h.p.HikariPool:825 - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=53s83ms137µs539ns).
+2026-01-17 12:26:49.884 [boundedElastic-1]  INFO c.s.l.n.HumanApprovalNode:96 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 12:26:49.898 [boundedElastic-1]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:26:49.902 [reactor-http-epoll-8] ERROR c.s.l.n.HumanApprovalNode:104 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 12:27:22.492 [SpringApplicationShutdownHook]  INFO o.s.b.r.n.GracefulShutdown:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-17 12:27:50.529 [main]  INFO c.s.l.LlmBackendServiceApplication:54 - Starting LlmBackendServiceApplication using Java 17.0.6 with PID 1785521 (/home/shehan/Documents/dev/ML_service/llm/llmsvr/target/classes started by shehan in /home/shehan/Documents/dev/ML_service/llm/llmsvr)
+2026-01-17 12:27:50.550 [main]  INFO c.s.l.LlmBackendServiceApplication:652 - No active profile set, falling back to 1 default profile: "default"
+2026-01-17 12:27:52.184 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:145 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-17 12:27:52.400 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:213 - Finished Spring Data repository scanning in 188 ms. Found 4 JPA repository interfaces.
+2026-01-17 12:27:53.383 [main]  INFO o.h.o.jpa:102 - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-17 12:27:53.429 [main]  INFO o.h.o.core:41 - HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-17 12:27:54.060 [main]  INFO o.s.o.j.p.SpringPersistenceUnitInfo:128 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-17 12:27:54.101 [main]  INFO c.z.h.HikariDataSource:109 - HikariPool-1 - Starting...
+2026-01-17 12:27:54.559 [main]  INFO c.z.h.p.HikariPool:580 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4cc4d454
+2026-01-17 12:27:54.561 [main]  INFO c.z.h.HikariDataSource:122 - HikariPool-1 - Start completed.
+2026-01-17 12:27:54.673 [main]  INFO o.h.o.c.pooling:179 - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/LLM_DB]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: LLM_DB/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-17 12:27:56.201 [main]  INFO o.h.o.core:53 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-17 12:27:56.388 [main]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:444 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 12:27:56.533 [main]  INFO o.s.d.j.r.q.QueryEnhancerFactories:48 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-17 12:27:58.105 [main]  INFO o.s.b.r.n.NettyWebServer:142 - Netty started on port 8080 (http)
+2026-01-17 12:27:58.115 [main]  INFO c.s.l.LlmBackendServiceApplication:60 - Started LlmBackendServiceApplication in 9.157 seconds (process running for 13.014)
+2026-01-17 12:27:58.122 [main]  INFO c.s.l.s.NodeJsRunner:21 - Checking Node.js version...
+2026-01-17 12:28:35.758 [boundedElastic-2]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 12:28:38.825 [boundedElastic-3]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=2}
+2026-01-17 12:28:47.481 [boundedElastic-2]  INFO c.s.l.n.HumanApprovalNode:97 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 12:28:47.486 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:28:47.492 [reactor-http-epoll-2] ERROR c.s.l.n.HumanApprovalNode:105 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 12:28:53.978 [reactor-http-epoll-3]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 12:28:53.979 [reactor-http-epoll-3]  INFO c.s.l.s.i.WorkflowEngineImpl:55 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 by re-executing HumanApprovalNode: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 12:29:34.732 [boundedElastic-1]  INFO c.s.l.n.HumanApprovalNode:97 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 12:29:34.745 [boundedElastic-1]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:29:34.746 [reactor-http-epoll-6] ERROR c.s.l.n.HumanApprovalNode:105 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 12:30:15.186 [boundedElastic-4]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=1}
+2026-01-17 12:30:28.088 [boundedElastic-2]  INFO c.s.l.n.HumanApprovalNode:97 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 12:30:28.096 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:30:28.098 [reactor-http-epoll-4] ERROR c.s.l.n.HumanApprovalNode:105 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 12:30:39.993 [reactor-http-epoll-1]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 12:30:39.994 [reactor-http-epoll-1]  INFO c.s.l.s.i.WorkflowEngineImpl:55 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 by re-executing HumanApprovalNode: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 12:32:13.975 [HikariPool-1:housekeeper]  WARN c.z.h.p.HikariPool:825 - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m3s236ms462µs556ns).
+2026-01-17 12:32:13.977 [boundedElastic-1]  INFO c.s.l.n.HumanApprovalNode:97 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 12:32:13.987 [boundedElastic-1]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:32:13.990 [reactor-http-epoll-8] ERROR c.s.l.n.HumanApprovalNode:105 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 12:32:14.043 [SpringApplicationShutdownHook]  INFO o.s.b.r.n.GracefulShutdown:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-17 12:32:44.056 [SpringApplicationShutdownHook]  INFO o.s.c.s.DefaultLifecycleProcessor:657 - Shutdown phase 2147482623 ends with 1 bean still running after timeout of 30000ms: [webServerGracefulShutdown]
+2026-01-17 12:32:44.058 [netty-shutdown]  INFO o.s.b.r.n.GracefulShutdown:68 - Graceful shutdown aborted with one or more requests still active
+2026-01-17 12:32:44.064 [reactor-http-epoll-5]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:32:46.092 [SpringApplicationShutdownHook]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:667 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 12:32:46.097 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:349 - HikariPool-1 - Shutdown initiated...
+2026-01-17 12:32:46.110 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:351 - HikariPool-1 - Shutdown completed.
+2026-01-17 12:37:30.363 [main]  INFO c.s.l.LlmBackendServiceApplication:54 - Starting LlmBackendServiceApplication using Java 17.0.6 with PID 1893514 (/home/shehan/Documents/dev/ML_service/llm/llmsvr/target/classes started by shehan in /home/shehan/Documents/dev/ML_service/llm/llmsvr)
+2026-01-17 12:37:30.371 [main]  INFO c.s.l.LlmBackendServiceApplication:652 - No active profile set, falling back to 1 default profile: "default"
+2026-01-17 12:37:31.068 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:145 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-17 12:37:31.162 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:213 - Finished Spring Data repository scanning in 84 ms. Found 4 JPA repository interfaces.
+2026-01-17 12:37:31.786 [main]  INFO o.h.o.jpa:102 - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-17 12:37:31.855 [main]  INFO o.h.o.core:41 - HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-17 12:37:32.390 [main]  INFO o.s.o.j.p.SpringPersistenceUnitInfo:128 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-17 12:37:32.423 [main]  INFO c.z.h.HikariDataSource:109 - HikariPool-1 - Starting...
+2026-01-17 12:37:32.800 [main]  INFO c.z.h.p.HikariPool:580 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@60a4e619
+2026-01-17 12:37:32.803 [main]  INFO c.z.h.HikariDataSource:122 - HikariPool-1 - Start completed.
+2026-01-17 12:37:32.901 [main]  INFO o.h.o.c.pooling:179 - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/LLM_DB]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: LLM_DB/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-17 12:37:34.190 [main]  INFO o.h.o.core:53 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-17 12:37:34.288 [main]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:444 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 12:37:34.431 [main]  INFO o.s.d.j.r.q.QueryEnhancerFactories:48 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-17 12:37:35.722 [main]  INFO o.s.b.r.n.NettyWebServer:142 - Netty started on port 8080 (http)
+2026-01-17 12:37:35.727 [main]  INFO c.s.l.LlmBackendServiceApplication:60 - Started LlmBackendServiceApplication in 6.406 seconds (process running for 8.489)
+2026-01-17 12:37:35.731 [main]  INFO c.s.l.s.NodeJsRunner:21 - Checking Node.js version...
+2026-01-17 12:38:06.339 [SpringApplicationShutdownHook]  INFO o.s.b.r.n.GracefulShutdown:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-17 12:38:06.344 [netty-shutdown]  INFO o.s.b.r.n.GracefulShutdown:64 - Graceful shutdown complete
+2026-01-17 12:38:08.369 [SpringApplicationShutdownHook]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:667 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 12:38:08.372 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:349 - HikariPool-1 - Shutdown initiated...
+2026-01-17 12:38:08.383 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:351 - HikariPool-1 - Shutdown completed.
+2026-01-17 12:38:16.242 [main]  INFO c.s.l.LlmBackendServiceApplication:54 - Starting LlmBackendServiceApplication using Java 17.0.6 with PID 1907100 (/home/shehan/Documents/dev/ML_service/llm/llmsvr/target/classes started by shehan in /home/shehan/Documents/dev/ML_service/llm/llmsvr)
+2026-01-17 12:38:16.257 [main]  INFO c.s.l.LlmBackendServiceApplication:652 - No active profile set, falling back to 1 default profile: "default"
+2026-01-17 12:38:18.023 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:145 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-17 12:38:18.388 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:213 - Finished Spring Data repository scanning in 334 ms. Found 4 JPA repository interfaces.
+2026-01-17 12:38:19.524 [main]  INFO o.h.o.jpa:102 - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-17 12:38:19.658 [main]  INFO o.h.o.core:41 - HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-17 12:38:20.396 [main]  INFO o.s.o.j.p.SpringPersistenceUnitInfo:128 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-17 12:38:20.433 [main]  INFO c.z.h.HikariDataSource:109 - HikariPool-1 - Starting...
+2026-01-17 12:38:20.902 [main]  INFO c.z.h.p.HikariPool:580 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2558f65c
+2026-01-17 12:38:20.905 [main]  INFO c.z.h.HikariDataSource:122 - HikariPool-1 - Start completed.
+2026-01-17 12:38:21.004 [main]  INFO o.h.o.c.pooling:179 - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/LLM_DB]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: LLM_DB/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-17 12:38:22.402 [main]  INFO o.h.o.core:53 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-17 12:38:22.535 [main]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:444 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 12:38:22.693 [main]  INFO o.s.d.j.r.q.QueryEnhancerFactories:48 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-17 12:38:24.558 [main]  INFO o.s.b.r.n.NettyWebServer:142 - Netty started on port 8080 (http)
+2026-01-17 12:38:24.568 [main]  INFO c.s.l.LlmBackendServiceApplication:60 - Started LlmBackendServiceApplication in 9.867 seconds (process running for 11.411)
+2026-01-17 12:38:24.574 [main]  INFO c.s.l.s.NodeJsRunner:21 - Checking Node.js version...
+2026-01-17 12:38:35.478 [boundedElastic-2]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 12:38:41.295 [boundedElastic-3]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=1}
+2026-01-17 12:38:58.664 [boundedElastic-2]  INFO c.s.l.n.HumanApprovalNode:99 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 12:38:58.673 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:38:58.695 [reactor-http-epoll-2] ERROR c.s.l.n.HumanApprovalNode:107 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 12:39:04.084 [reactor-http-epoll-5]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 12:39:04.086 [reactor-http-epoll-5]  INFO c.s.l.s.i.WorkflowEngineImpl:55 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 by re-executing HumanApprovalNode: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 12:39:10.316 [boundedElastic-1]  INFO c.s.l.n.HumanApprovalNode:44 - Internal Resume Processing: Human chose action [success] with status [APPROVED]
+2026-01-17 12:39:19.079 [boundedElastic-1]  INFO c.s.l.n.HumanApprovalNode:52 - Notifying AI service at http://localhost:8500/api/v1/approve/1: approved=true
+2026-01-17 12:39:33.643 [boundedElastic-3]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 12:39:36.449 [boundedElastic-3]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:41:21.612 [reactor-http-epoll-4]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:41:48.135 [SpringApplicationShutdownHook]  INFO o.s.b.r.n.GracefulShutdown:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-17 12:41:48.141 [netty-shutdown]  INFO o.s.b.r.n.GracefulShutdown:64 - Graceful shutdown complete
+2026-01-17 12:41:50.164 [SpringApplicationShutdownHook]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:667 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 12:41:50.167 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:349 - HikariPool-1 - Shutdown initiated...
+2026-01-17 12:41:50.175 [SpringApplicationShutdownHook]  INFO c.z.h.HikariDataSource:351 - HikariPool-1 - Shutdown completed.
+2026-01-17 12:41:57.627 [main]  INFO c.s.l.LlmBackendServiceApplication:54 - Starting LlmBackendServiceApplication using Java 17.0.6 with PID 1951309 (/home/shehan/Documents/dev/ML_service/llm/llmsvr/target/classes started by shehan in /home/shehan/Documents/dev/ML_service/llm/llmsvr)
+2026-01-17 12:41:57.632 [main]  INFO c.s.l.LlmBackendServiceApplication:652 - No active profile set, falling back to 1 default profile: "default"
+2026-01-17 12:41:58.299 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:145 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-17 12:41:58.437 [main]  INFO o.s.d.r.c.RepositoryConfigurationDelegate:213 - Finished Spring Data repository scanning in 122 ms. Found 4 JPA repository interfaces.
+2026-01-17 12:41:59.155 [main]  INFO o.h.o.jpa:102 - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-17 12:41:59.230 [main]  INFO o.h.o.core:41 - HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-17 12:41:59.824 [main]  INFO o.s.o.j.p.SpringPersistenceUnitInfo:128 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-17 12:41:59.858 [main]  INFO c.z.h.HikariDataSource:109 - HikariPool-1 - Starting...
+2026-01-17 12:42:00.376 [main]  INFO c.z.h.p.HikariPool:580 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2fa879ed
+2026-01-17 12:42:00.378 [main]  INFO c.z.h.HikariDataSource:122 - HikariPool-1 - Start completed.
+2026-01-17 12:42:00.466 [main]  INFO o.h.o.c.pooling:179 - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/LLM_DB]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: LLM_DB/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-17 12:42:01.509 [main]  INFO o.h.o.core:53 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-17 12:42:01.571 [main]  INFO o.s.o.j.LocalContainerEntityManagerFactoryBean:444 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-17 12:42:01.663 [main]  INFO o.s.d.j.r.q.QueryEnhancerFactories:48 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-17 12:42:02.735 [main]  INFO o.s.b.r.n.NettyWebServer:142 - Netty started on port 8080 (http)
+2026-01-17 12:42:02.740 [main]  INFO c.s.l.LlmBackendServiceApplication:60 - Started LlmBackendServiceApplication in 5.754 seconds (process running for 7.685)
+2026-01-17 12:42:02.744 [main]  INFO c.s.l.s.NodeJsRunner:21 - Checking Node.js version...
+2026-01-17 12:42:18.212 [boundedElastic-2]  INFO c.s.l.e.EventReloadListener:28 - Routes reloaded after workflow change
+2026-01-17 12:42:24.243 [reactor-http-epoll-4]  INFO c.s.l.c.WorkflowTraceWebSocketHandler:44 - WS Connection closed for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:42:31.559 [boundedElastic-3]  INFO c.s.l.n.AIAgentNode:45 - Final AI Request Payload: {message=need all users from database and send to shehan.salinda92@gmail.com, messages=[need all users from database and send to shehan.salinda92@gmail.com], sessionId=1}
+2026-01-17 12:42:38.586 [boundedElastic-2]  INFO c.s.l.n.HumanApprovalNode:103 - Sending approval request to: http://localhost:8081/mock/approve
+2026-01-17 12:42:38.592 [boundedElastic-2]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313
+2026-01-17 12:42:38.605 [reactor-http-epoll-3] ERROR c.s.l.n.HumanApprovalNode:111 - Failed to deliver approval webhook: finishConnect(..) failed with error(-111): Connection refused: localhost/127.0.0.1:8081
+2026-01-17 12:42:51.346 [reactor-http-epoll-6]  INFO c.s.l.c.HttpRouteBuilder:236 - Resuming workflow instance: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 with action: success
+2026-01-17 12:42:51.348 [reactor-http-epoll-6]  INFO c.s.l.s.i.WorkflowEngineImpl:55 - Resuming runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313 by re-executing HumanApprovalNode: 21f28177-81d1-48da-bd95-5de07e4934cb
+2026-01-17 12:42:58.742 [boundedElastic-1]  INFO c.s.l.n.HumanApprovalNode:44 - Internal Resume Processing: Human chose action [success] with status [APPROVED]
+2026-01-17 12:43:03.927 [boundedElastic-1]  INFO c.s.l.n.HumanApprovalNode:56 - Notifying AI service at http://localhost:8500/api/v1/approve/1: approved=true
+2026-01-17 12:43:35.354 [boundedElastic-1]  INFO c.s.l.n.HumanApprovalNode:69 - AI service responded: {status=completed, response={lc=1, type=constructor, id=[langchain_core, messages, AIMessage], kwargs={id=chatcmpl-CyumjjeoSVKyQxRqWMA8hRuKhYiM7, content=It seems there was an issue retrieving the user data from the database. Let me try that again to get all users for you., additional_kwargs={tool_calls=[{id=call_mIUYCVdg120ev1XgNfbJunaP, type=function, function={name=sql_tool, arguments={"input":"SELECT * FROM users;"}}}]}, response_metadata={tokenUsage={promptTokens=152, completionTokens=45, totalTokens=197}, finish_reason=tool_calls, model_provider=openai, model_name=gpt-4o-mini-2024-07-18, usage={prompt_tokens=152, completion_tokens=45, total_tokens=197, prompt_tokens_details={cached_tokens=0, audio_tokens=0}, completion_tokens_details={reasoning_tokens=0, audio_tokens=0, accepted_prediction_tokens=0, rejected_prediction_tokens=0}}, system_fingerprint=fp_c4585b5b9c}, type=ai, tool_calls=[{name=sql_tool, args={input=SELECT * FROM users;}, type=tool_call, id=call_mIUYCVdg120ev1XgNfbJunaP}], invalid_tool_calls=[], usage_metadata={output_tokens=45, input_tokens=152, total_tokens=197, input_token_details={audio=0, cache_read=0}, output_token_details={audio=0, reasoning=0}}}}, routing={agentName=generalAgent, reasoning=The user query is related to database operations and email, which is unrelated to weather. The generalAgent is suitable for handling broad queries and general knowledge., confidence=0.9}, sessionId=1}
+2026-01-17 12:43:35.360 [boundedElastic-3]  INFO c.s.l.n.GmailNode:21 - 📧 Executing Gmail Node with config: {icon=, inputProps=[{type=text, values=[], name=password, defaultValue=, value=, displayName=Password, required=true}, {type=text, values=[], name=to, defaultValue=, value=, displayName=To, required=true}, {type=number, values=[], name=port, defaultValue=587, value=587, displayName=To, required=true}, {type=checkBox, values=[], name=tls, defaultValue=false, value=false, displayName=TLS, required=true}]}
+2026-01-17 12:43:50.076 [boundedElastic-3]  INFO c.s.l.s.i.WorkflowEngineImpl:64 - Workflow execution finished for runId: 1ebe29c3-4777-409c-8bcb-33e77f8e5313

@@ -26,41 +26,25 @@ public class HttpRouteBuilder {
     private final WorkflowEngine engine;
 
     public Mono<RouterFunction<ServerResponse>> buildAsync() {
-
         return workflowService.getAll()
                 .collectList()
                 .map(workflows -> {
-
                     List<RouterFunction<ServerResponse>> routes = new ArrayList<>();
 
                     for (Workflow workflow : workflows) {
                         workflow.getDefinition().getNodes().forEach(node -> {
-
                             boolean isHttpTrigger = "trigger.http".equals(node.getType());
                             boolean isWhatsappTrigger = "trigger.whatsapp".equals(node.getType());
-                            if (!isHttpTrigger && !isWhatsappTrigger) return;
+                            boolean isHumanApprovalTrigger = "human.approval".equals(node.getType());
+
+                            if (!isHttpTrigger && !isWhatsappTrigger && !isHumanApprovalTrigger) return;
 
                             Map<String, Object> config = node.getConfig();
-
-                            String methodCfg = NodeConfigUtil.getInputProp(
-                                    config, "method", "POST"
-                            );
-
-                            String path = NodeConfigUtil.getInputProp(
-                                    config,
-                                    "path",
-                                    isWhatsappTrigger
-                                            ? "/webhook/whatsapp/{flowId}"
-                                            : "/webhook/http/{flowId}"
-                            );
-
-                            String mediaType = NodeConfigUtil.getInputProp(
-                                    config, "mediaType", "application/json"
-                            );
-
-                            String verifyToken = NodeConfigUtil.getInputProp(
-                                    config, "verifyToken", null
-                            );
+                            String methodCfg = NodeConfigUtil.getInputProp(config, "method", "POST");
+                            String path = NodeConfigUtil.getInputProp(config, "path",
+                                    NodeConfigUtil.getInputProp(config, "inboundWebhookUrl", ""));
+                            String mediaType = NodeConfigUtil.getInputProp(config, "mediaType", "application/json");
+                            String verifyToken = NodeConfigUtil.getInputProp(config, "verifyToken", null);
 
                             Map<String, String> cfg = new HashMap<>();
                             cfg.put("method", methodCfg);
@@ -71,7 +55,6 @@ public class HttpRouteBuilder {
                             }
 
                             RequestPredicate methodPredicate;
-
                             if (methodCfg.contains("/") || methodCfg.contains(",")) {
                                 String[] methods = methodCfg.split("[/,]");
                                 methodPredicate = Arrays.stream(methods)
@@ -87,16 +70,20 @@ public class HttpRouteBuilder {
                                 );
                             }
 
-                            RequestPredicate predicate =
-                                    RequestPredicates.path(path)
-                                            .and(methodPredicate);
+                            RequestPredicate predicate = RequestPredicates.path(path).and(methodPredicate);
 
                             routes.add(
                                     RouterFunctions.route(
                                             predicate,
-                                            req -> isWhatsappTrigger
-                                                    ? handleWhatsappRequest(req, cfg)
-                                                    : handleHTTPRequest(req, cfg)
+                                            req -> {
+                                                if (isWhatsappTrigger) {
+                                                    return handleWhatsappRequest(req, cfg);
+                                                } else if (isHumanApprovalTrigger) {
+                                                    return handleHumanApprovalRequest(req, cfg);
+                                                } else {
+                                                    return handleHTTPRequest(req, cfg);
+                                                }
+                                            }
                                     )
                             );
                         });
@@ -233,6 +220,34 @@ public class HttpRouteBuilder {
                                     "success", false,
                                     "error", e.getMessage()
                             ));
+                });
+    }
+
+    private Mono<ServerResponse> handleHumanApprovalRequest(ServerRequest request, Map<String, String> cfg) {
+        String runId = request.pathVariable("flowId");
+
+        return request.bodyToMono(Map.class)
+                .defaultIfEmpty(Map.of())
+                .flatMap(body -> {
+                    Map<String, Object> approvalData = new HashMap<>(body);
+                    MessageBatch humanInput = new MessageBatch(List.of(new WorkflowMessage(approvalData)));
+                    String outputHandle = body.getOrDefault("action", "success").toString();
+
+                    log.info("Resuming workflow instance: {} with action: {}", runId, outputHandle);
+
+                    return engine.resume(runId, humanInput, outputHandle)
+                            .flatMap(id -> ServerResponse.ok()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue(Map.of(
+                                            "status", "resumed",
+                                            "runId", id,
+                                            "timestamp", System.currentTimeMillis()
+                                    )));
+                })
+                .onErrorResume(e -> {
+                    log.error("Approval resume error for runId: {}", runId, e);
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .bodyValue(Map.of("error", e.getMessage()));
                 });
     }
 }

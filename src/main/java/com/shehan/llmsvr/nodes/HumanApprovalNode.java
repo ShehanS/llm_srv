@@ -6,16 +6,21 @@ import com.shehan.llmsvr.dtos.WorkflowMessage;
 import com.shehan.llmsvr.helper.ExpressionResolver;
 import com.shehan.llmsvr.helper.NodeConfigUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Component
 public class HumanApprovalNode implements WorkflowNode {
+    @Value("${intelligent-srv.url}")
+    private String intelligentSrvUrl;
     private final WebClient webClient = WebClient.builder().build();
 
     @Override
@@ -24,26 +29,61 @@ public class HumanApprovalNode implements WorkflowNode {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public NodeResult execute(MessageBatch input, Map<String, Object> config) throws Exception {
         if (input == null || input.getItems() == null || input.getItems().isEmpty()) {
+            log.error("HumanApprovalNode received empty input");
             return NodeResult.error(input);
         }
 
         WorkflowMessage first = input.getItems().get(0);
         Map<String, Object> inData = first.getData();
+        String action = String.valueOf(inData.getOrDefault("action", "success"));
+        String status = String.valueOf(inData.getOrDefault("status", ""));
+        if (inData.containsKey("action")) {
+            log.info("Internal Resume Processing: Human chose action [{}] with status [{}]", action, status);
 
+            inData.put("node_processed_at", Instant.now().toString());
+            inData.put("approval_status", "PROCESSED_BY_NODE");
 
+            String sessionId = String.valueOf(inData.get("sessionId"));
+            String agentUrl = intelligentSrvUrl + "/api/v1/approve/" + sessionId;
+
+            Map<String, Object> actionRequest = new HashMap<>();
+            boolean isApproved = status.toLowerCase().contains("approved") || action.equalsIgnoreCase("success");
+            actionRequest.put("approved", isApproved);
+
+            log.info("Notifying AI service at {}: approved={}", agentUrl, isApproved);
+
+            try {
+                Object response = webClient
+                        .post()
+                        .uri(agentUrl)
+                        .bodyValue(actionRequest)
+                        .retrieve()
+                        .toEntity(Object.class)
+                        .map(res -> res.getBody() != null ? res.getBody() : "SUCCESS")
+                        .block();
+
+                inData.put("response", response);
+                log.info("AI service responded: {}", response);
+
+            } catch (Exception e) {
+                log.error("Failed to notify AI service: {}", e.getMessage());
+                inData.put("response", "ERROR: " + e.getMessage());
+            }
+
+            return NodeResult.complected(action, new MessageBatch(List.of(new WorkflowMessage(inData))));
+        }
         Map<String, Object> inputContext = new HashMap<>();
         inputContext.put("input", inData);
         inputContext.put("body", inData.getOrDefault("body", inData));
         inputContext.put("headers", inData.getOrDefault("headers", Collections.emptyMap()));
-        inputContext.put("query", inData.getOrDefault("query", Collections.emptyMap()));
         inputContext.put("all", inData);
-
         Map<String, Object> webhookPayload = new HashMap<>();
 
         String payloadSource = NodeConfigUtil.getMapperPayloadSource(config, "inputMapper", "");
-        if (!payloadSource.isBlank()) {
+        if (!payloadSource.isBlank() && inputContext.containsKey(payloadSource)) {
             Object sourceData = inputContext.get(payloadSource);
             if (sourceData instanceof Map) {
                 webhookPayload.putAll((Map<String, Object>) sourceData);
@@ -58,21 +98,24 @@ public class HumanApprovalNode implements WorkflowNode {
         );
         if (resolvedInput != null) webhookPayload.putAll(resolvedInput);
 
-        String webhookUrl = NodeConfigUtil.getInputProp(config, "webhookUrl", "");
+        String webhookUrl = NodeConfigUtil.getInputProp(config, "outboundWebhookUrl", "");
         if (!webhookUrl.isBlank()) {
-            log.info("Triggering approval webhook: {}", webhookUrl);
+            log.info("Sending approval request to: {}", webhookUrl);
             webClient.post()
                     .uri(webhookUrl)
                     .bodyValue(webhookPayload)
                     .retrieve()
                     .toBodilessEntity()
-                    .subscribe();
+                    .subscribe(
+                            resp -> log.debug("Approval webhook successfully delivered"),
+                            err -> log.error("Failed to deliver approval webhook: {}", err.getMessage())
+                    );
         }
 
         return NodeResult.waitFormApproval(Map.of(
-                "message", "Waiting for external webhook response",
+                "message", "Awaiting human-in-the-loop decision",
                 "requestSent", webhookPayload,
-                "originalAiResponse", inData
+                "waitingSince", Instant.now().toString()
         ));
     }
 }
