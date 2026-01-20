@@ -91,7 +91,12 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                         emitTrace(createTrace(ctx, ExecutionTrace.Status.FAILED, startedAt, inputMessages, result.getMessages(), "Node execution failed"));
                         return Flux.error(new RuntimeException("Node returned error status"));
                     }
-
+                    if (result.getStatus() == NodeResult.Status.SKIP) {
+                        emitTrace(createTrace(ctx, ExecutionTrace.Status.SKIP, startedAt, inputMessages, result.getMessages(), "Node skipped"));
+                        List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), result.getOutput());
+                        return Flux.fromIterable(nextNodes)
+                                .map(next -> new ExecutionContext(next, inputMessages, ctx.getRunId(), ctx.getAttempt()));
+                    }
 
                     emitTrace(createTrace(ctx, ExecutionTrace.Status.COMPLETE, startedAt, inputMessages, result.getMessages(), null));
                     List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), result.getOutput());
@@ -103,7 +108,6 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                     return Flux.error(e);
                 });
     }
-
     private List<FlowNode> findNextNodes(WorkflowDefinition wf, String sourceId, String output) {
         return wf.getEdges().stream()
                 .filter(e -> sourceId.equals(e.getSource()) && output.equals(e.getSourceHandle()))

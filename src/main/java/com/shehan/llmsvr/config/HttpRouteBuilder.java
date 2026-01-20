@@ -182,7 +182,8 @@ public class HttpRouteBuilder {
                                 .defaultIfEmpty(new LinkedMultiValueMap<>())
                                 .flatMap(form -> {
                                     Map<String, Object> bodyData = new HashMap<>();
-                                    bodyData.put("contact", form.getFirst("From"));
+                                    String contact = form.getFirst("From").replace("whatsapp:", "");
+                                    bodyData.put("contact", contact);
                                     bodyData.put("message", form.getFirst("Body"));
 
                                     Map<String, Object> data = new HashMap<>();
@@ -199,7 +200,7 @@ public class HttpRouteBuilder {
                                             flowId
                                     ).then(ServerResponse.ok()
                                             .contentType(MediaType.APPLICATION_XML)
-                                            .bodyValue("<Response><Message>Processed</Message></Response>"));
+                                            .bodyValue("<Response><Message>Thank you..., Your message is processing</Message></Response>"));
                                 })
                 )
                 .switchIfEmpty(ServerResponse.status(HttpStatus.NOT_FOUND)

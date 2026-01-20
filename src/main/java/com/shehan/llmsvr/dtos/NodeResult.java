@@ -12,7 +12,8 @@ public class NodeResult {
         COMPLETED,
         WAITING,
         FAILED,
-        ERROR
+        ERROR,
+        SKIP
     }
 
     private Status status;
@@ -40,6 +41,13 @@ public class NodeResult {
         r.status = Status.ERROR;
         r.messages = messages;
         r.output = "error";
+        return r;
+    }
+
+    public static NodeResult skip(MessageBatch messages) {
+        NodeResult r = new NodeResult();
+        r.messages = messages;
+        r.status = Status.SKIP;
         return r;
     }
 

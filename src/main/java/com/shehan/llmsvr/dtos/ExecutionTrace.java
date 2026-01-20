@@ -32,6 +32,7 @@ public class ExecutionTrace {
         FAILED,
         RUNNING,
         ERROR,
-        COMPLETE
+        COMPLETE,
+        SKIP
     }
 }
