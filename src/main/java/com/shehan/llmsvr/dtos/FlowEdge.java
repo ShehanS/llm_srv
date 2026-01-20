@@ -7,4 +7,5 @@ public class FlowEdge {
     private String source;
     private String target;
     private String sourceHandle;
+    private String type;
 }

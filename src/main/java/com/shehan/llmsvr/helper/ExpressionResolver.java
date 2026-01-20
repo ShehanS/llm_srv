@@ -17,13 +17,12 @@ public class ExpressionResolver {
             Map<String, Object> fallback
     ) {
         List<Map<String, String>> mappings = NodeConfigUtil.getMapperMap(config, mapperName, null);
-        Map<String, String> flowIdMap = new HashMap<>();
+
         if (mappings == null || mappings.isEmpty()) {
-            return new HashMap<>(fallback);
+            return fallback != null ? new HashMap<>(fallback) : new HashMap<>();
         }
 
         Map<String, Object> result = new HashMap<>();
-
         for (Map<String, String> mapping : mappings) {
             String key = mapping.get("key");
             String valueExpr = mapping.get("value");
@@ -35,7 +34,6 @@ public class ExpressionResolver {
 
         return result;
     }
-
     public static Object resolve(String expression, Map<String, Object> context) {
         if (expression == null || expression.isBlank()) {
             return null;

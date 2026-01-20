@@ -92,7 +92,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                         return Flux.error(new RuntimeException("Node returned error status"));
                     }
 
-                    // COMPLETION LOGIC
+
                     emitTrace(createTrace(ctx, ExecutionTrace.Status.COMPLETE, startedAt, inputMessages, result.getMessages(), null));
                     List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), result.getOutput());
                     return Flux.fromIterable(nextNodes)
@@ -152,13 +152,12 @@ public class WorkflowEngineImpl implements WorkflowEngine {
     }
 
     @Override
-    public Mono<String> runFromNode(MessageBatch batch, WorkflowDefinition wf, String startNodeId) {
-        String runId = UUID.randomUUID().toString();
-        prepareForRun(runId);
+    public Mono<String> runFromNode(MessageBatch batch, WorkflowDefinition wf, String startNodeId, String flowId) {
+        prepareForRun(flowId);
         FlowNode start = wf.getNodes().stream().filter(n -> n.getId().equals(startNodeId)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Node not found"));
-        executeWorkflow(new ExecutionContext(start, batch, runId, 0), wf);
-        return Mono.just(runId);
+        executeWorkflow(new ExecutionContext(start, batch, flowId, 0), wf);
+        return Mono.just(flowId);
     }
 
     @Override

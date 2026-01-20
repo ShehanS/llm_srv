@@ -67,7 +67,7 @@ public class AIAgentNode implements WorkflowNode {
                     "awaiting_approval".equals(responseData.get("status"))) {
                 responseData.put("flowId", String.valueOf(inData.get("flowId")));
                 MessageBatch nextBatch = new MessageBatch(List.of(new WorkflowMessage(responseData)));
-                return NodeResult.complected("default", nextBatch);
+                return NodeResult.complected("action", nextBatch);
             }
 
             Map<String, Object> outputContext = Map.of(
@@ -78,7 +78,7 @@ public class AIAgentNode implements WorkflowNode {
 
             Map<String, Object> out = ExpressionResolver.resolve(config, "outputMapper", outputContext, responseData);
 
-            return NodeResult.complected("default", new MessageBatch(List.of(new WorkflowMessage(out))));
+            return NodeResult.complected("success", new MessageBatch(List.of(new WorkflowMessage(out))));
 
         } catch (Exception e) {
             log.error("AI Agent communication failed: {}", e.getMessage());

@@ -44,7 +44,7 @@ public class WebhookController {
             return Mono.just(ResponseEntity.status(405).build());
         }
         MessageBatch batch = new MessageBatch(List.of(new WorkflowMessage(Map.of("provider", "http", "workflowId", workflowId, "nodeId", nodeId, "method", method.name(), "query", query, "headers", headers, "body", body))));
-        return engine.runFromNode(batch, wf, nodeId).map(runId -> ResponseEntity.accepted().body(Map.of("status", "accepted", "workflowId", workflowId, "nodeId", nodeId, "runId", runId)));
+        return engine.runFromNode(batch, wf, nodeId, workflowId).map(runId -> ResponseEntity.accepted().body(Map.of("status", "accepted", "workflowId", workflowId, "nodeId", nodeId, "runId", runId)));
     }
 
     private String getInputProp(FlowNode node, String name, String def) {

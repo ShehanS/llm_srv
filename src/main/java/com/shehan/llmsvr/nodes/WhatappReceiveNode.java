@@ -10,11 +10,11 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class WhatsAppNode implements WorkflowNode {
+public class WhatappReceiveNode implements WorkflowNode {
 
     @Override
     public String getType() {
-        return "whatsapp.send";
+        return "whatsapp.receive";
     }
 
     @Override
