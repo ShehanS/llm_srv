@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -22,5 +22,5 @@ public class Agent extends BaseClass<Agent, AgentEntity> {
     private Boolean isDefault;
     private ModelConfig model;
     private String systemPrompt;
-    private List<Tool> tools;
+    private Set<String> tools;
 }

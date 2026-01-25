@@ -1,20 +1,18 @@
 package com.shehan.llmsvr.service.impl;
 
-
 import com.shehan.llmsvr.dtos.Agent;
 import com.shehan.llmsvr.dtos.MainConfig;
 import com.shehan.llmsvr.dtos.RoutingConfig;
 import com.shehan.llmsvr.dtos.Tool;
 import com.shehan.llmsvr.entites.AgentEntity;
 import com.shehan.llmsvr.entites.RoutingConfigEntity;
-import com.shehan.llmsvr.entites.ToolEntity;
 import com.shehan.llmsvr.event.EventPublisher;
 import com.shehan.llmsvr.repositories.AgentRepository;
 import com.shehan.llmsvr.repositories.RoutingRepository;
-import com.shehan.llmsvr.repositories.ToolRepository;
 import com.shehan.llmsvr.service.ConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -29,10 +27,9 @@ import java.util.List;
 public class ConfigServiceImpl implements ConfigService {
 
     private final AgentRepository agentRepository;
-    private final ToolRepository toolRepository;
     private final RoutingRepository routingRepository;
     private final EventPublisher eventPublisher;
-
+    private final List<ToolCallback> toolCallbacks;
 
     @Override
     public Mono<MainConfig> getFullConfig(String routeName) {
@@ -59,7 +56,8 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public Mono<RoutingConfig> getRouteConfig(String routeName) {
         return Mono.fromCallable(() -> routingRepository.findByRouteName(routeName))
-                .map(entity -> RoutingConfig.fromEntity(entity.get(), RoutingConfig.class))
+                .flatMap(Mono::justOrEmpty)
+                .map(entity -> RoutingConfig.fromEntity(entity, RoutingConfig.class))
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -78,8 +76,10 @@ public class ConfigServiceImpl implements ConfigService {
         return Mono.fromCallable(() -> {
                     AgentEntity existing = agentRepository.findById(id)
                             .orElseThrow(() -> new RuntimeException("Agent not found with id: " + id));
-                    agent.setId(existing.getId());
-                    return agentRepository.save(agent.toEntity(AgentEntity.class));
+
+                    AgentEntity toSave = agent.toEntity(AgentEntity.class);
+                    toSave.setId(existing.getId());
+                    return agentRepository.save(toSave);
                 }).map(entity -> Agent.fromEntity(entity, Agent.class))
                 .doOnSuccess(updateAgent -> eventPublisher.configSaved())
                 .subscribeOn(Schedulers.boundedElastic());
@@ -97,7 +97,7 @@ public class ConfigServiceImpl implements ConfigService {
     public Mono<Void> deleteAgent(Integer id) {
         return Mono.fromRunnable(() -> agentRepository.deleteById(id))
                 .subscribeOn(Schedulers.boundedElastic())
-                .doOnSuccess(deleteAgent -> eventPublisher.configSaved())
+                .doOnSuccess(v -> eventPublisher.configSaved())
                 .then();
     }
 
@@ -106,76 +106,50 @@ public class ConfigServiceImpl implements ConfigService {
     public Mono<Void> deleteRouteConfig(Integer id) {
         return Mono.fromRunnable(() -> routingRepository.deleteById(id))
                 .subscribeOn(Schedulers.boundedElastic())
-                .doOnSuccess(routeAgent -> eventPublisher.configSaved())
+                .doOnSuccess(v -> eventPublisher.configSaved())
                 .then();
-    }
-
-
-    @Override
-    @Transactional
-    public Mono<Tool> addTool(ToolEntity tool) {
-        return Mono.fromCallable(() -> toolRepository.save(tool))
-                .map(entity -> Tool.fromEntity(entity, Tool.class))
-                .doOnSuccess(addTool -> eventPublisher.configSaved())
-                .subscribeOn(Schedulers.boundedElastic());
-    }
-
-    @Override
-    @Transactional
-    public Mono<Tool> updateTool(Integer id, Tool tool) {
-        return Mono.fromCallable(() -> {
-                    ToolEntity existing = toolRepository.findById(id)
-                            .orElseThrow(() -> new RuntimeException("Tool not found with id: " + id));
-                    tool.setId(existing.getId());
-                    return toolRepository.save(tool.toEntity(ToolEntity.class));
-                }).map(entity -> Tool.fromEntity(entity, Tool.class))
-                .doOnSuccess(updateTool -> eventPublisher.configSaved())
-                .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
     public Flux<Tool> getAllTools() {
-        return Flux.defer(() -> Flux.fromIterable(toolRepository.findAll()))
-                .map(entity -> Tool.fromEntity(entity, Tool.class))
+        return Flux.fromIterable(toolCallbacks)
+                .map(tool -> {
+                    String name = tool.getToolDefinition().name();
+                    String description = tool.getToolDefinition().description();
+                    return Tool.builder()
+                            .name(name)
+                            .description(description)
+                            .type("mcp")
+                            .build();
+                })
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
-    public Mono<Void> deleteTool(Integer id) {
-        return Mono.fromRunnable(() -> toolRepository.deleteById(id))
+    @Transactional
+    public Mono<Void> linkToolToAgent(Integer agentId, String toolName) {
+        return Mono.fromRunnable(() -> {
+                    AgentEntity agent = agentRepository.findById(agentId)
+                            .orElseThrow(() -> new RuntimeException("Agent not found"));
+                    agent.getTools().add(toolName);
+                    agentRepository.save(agent);
+                }).doOnSuccess(v -> eventPublisher.configSaved())
                 .subscribeOn(Schedulers.boundedElastic())
-                .doOnSuccess(deleteTool -> eventPublisher.configSaved())
                 .then();
     }
 
-
     @Override
     @Transactional
-    public Mono<Void> linkToolToAgent(Integer agentId, Integer toolId) {
+    public Mono<Void> unlinkToolFromAgent(Integer agentId, String toolName) {
         return Mono.fromRunnable(() -> {
                     AgentEntity agent = agentRepository.findById(agentId)
                             .orElseThrow(() -> new RuntimeException("Agent not found"));
-                    ToolEntity tool = toolRepository.findById(toolId)
-                            .orElseThrow(() -> new RuntimeException("Tool not found"));
-                    agent.getTools().add(tool);
+                    agent.getTools().remove(toolName);
                     agentRepository.save(agent);
-
-                }).doOnSuccess(linkAgent -> eventPublisher.configSaved())
-                .subscribeOn(Schedulers.boundedElastic()).then();
+                }).doOnSuccess(v -> eventPublisher.configSaved())
+                .subscribeOn(Schedulers.boundedElastic())
+                .then();
     }
-
-    @Override
-    @Transactional
-    public Mono<Void> unlinkToolFromAgent(Integer agentId, Integer toolId) {
-        return Mono.fromRunnable(() -> {
-                    AgentEntity agent = agentRepository.findById(agentId)
-                            .orElseThrow(() -> new RuntimeException("Agent not found"));
-                    agent.getTools().removeIf(t -> t.getId().equals(toolId));
-                    agentRepository.save(agent);
-                }).doOnSuccess(linkAgent -> eventPublisher.configSaved())
-                .subscribeOn(Schedulers.boundedElastic()).then();
-    }
-
 
     @Override
     public Flux<RoutingConfig> getRoutingConfigs() {
@@ -190,7 +164,7 @@ public class ConfigServiceImpl implements ConfigService {
                     RoutingConfigEntity routingConfig = routingRepository.save(routing.toEntity(RoutingConfigEntity.class));
                     return RoutingConfig.fromEntity(routingConfig, RoutingConfig.class);
                 })
-                .doOnSuccess(addConfig -> eventPublisher.configSaved())
+                .doOnSuccess(v -> eventPublisher.configSaved())
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -201,7 +175,7 @@ public class ConfigServiceImpl implements ConfigService {
                     RoutingConfigEntity routingConfig = routingRepository.save(routing.toEntity(RoutingConfigEntity.class));
                     return RoutingConfig.fromEntity(routingConfig, RoutingConfig.class);
                 })
-                .doOnSuccess(updateConfig -> eventPublisher.configSaved())
+                .doOnSuccess(v -> eventPublisher.configSaved())
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -225,9 +199,7 @@ public class ConfigServiceImpl implements ConfigService {
                             .subscribeOn(Schedulers.boundedElastic())
                             .then();
                 })
-                .doOnSuccess(linkAgent -> {
-                    eventPublisher.configSaved();
-                });
+                .doOnSuccess(v -> eventPublisher.configSaved());
     }
 
     @Override
@@ -246,9 +218,7 @@ public class ConfigServiceImpl implements ConfigService {
                     }
                     return Mono.empty();
                 })
-                .doOnSuccess(unlinkTool -> {
-                    eventPublisher.configSaved();
-                });
+                .doOnSuccess(v -> eventPublisher.configSaved());
     }
 
     @Override
@@ -265,7 +235,7 @@ public class ConfigServiceImpl implements ConfigService {
             route.getAgents().add(agent);
             routingRepository.save(route);
             return Mono.empty();
-        });
+        }).doOnSuccess(v -> eventPublisher.configSaved()).then();
     }
 
     @Override
@@ -283,6 +253,6 @@ public class ConfigServiceImpl implements ConfigService {
                 routingRepository.save(route);
             }
             return Mono.empty();
-        });
+        }).doOnSuccess(v -> eventPublisher.configSaved()).then();
     }
 }

@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -43,11 +44,11 @@ public class AgentEntity implements Serializable {
     @ManyToMany(mappedBy = "agents")
     private Set<RoutingConfigEntity> routingConfigs = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "tool_agents",
-            joinColumns = @JoinColumn(name = "agent_id"),
-            inverseJoinColumns = @JoinColumn(name = "tool_id")
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "agent_tool_names",
+            joinColumns = @JoinColumn(name = "agent_id")
     )
-    private Set<ToolEntity> tools = new HashSet<>();
+    @Column(name = "tools")
+    private Set<String> tools = new HashSet<>();
 }

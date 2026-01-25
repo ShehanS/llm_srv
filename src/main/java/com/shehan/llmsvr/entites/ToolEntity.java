@@ -20,7 +20,7 @@ public class ToolEntity implements Serializable {
     private Integer id;
 
     @Column(nullable = false, unique = true)
-    private String name; // e.g., "sql_tool"
+    private String name;
 
     @Column(columnDefinition = "TEXT")
     private String description;

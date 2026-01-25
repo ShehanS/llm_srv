@@ -1,5 +1,7 @@
 package com.shehan.llmsvr.nodes;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shehan.llmsvr.dtos.MessageBatch;
 import com.shehan.llmsvr.dtos.NodeResult;
 import com.shehan.llmsvr.dtos.WorkflowMessage;
@@ -7,12 +9,11 @@ import com.shehan.llmsvr.helper.ExpressionResolver;
 import com.shehan.llmsvr.helper.NodeConfigUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.server.context.WebServerInitializedEvent;
+import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+
 
 import java.net.InetAddress;
 import java.time.Instant;
@@ -80,14 +81,14 @@ public class HumanApprovalNode implements WorkflowNode {
                 JsonNode resJson = objectMapper.valueToTree(response);
 
 
-                if ((resJson.get("status").asString().equals("completed"))&&(resJson.get("response").get("kwargs") == null)){
+                if ((resJson.get("status").toString().equals("completed"))&&(resJson.get("response").get("kwargs") == null)){
                     inData.put("response", response);
                     inData.put("status","error");
                     inData.put("message","Session id not valid or process already complected");
                     return NodeResult.error(new MessageBatch(List.of(new WorkflowMessage(inData))));
 
                 }else{
-                    String content =resJson.get("response").get("kwargs").get("content").asString();
+                    String content =resJson.get("response").get("kwargs").get("content").toString();
                     inData.put("status","success");
                     inData.put("message", content);
                 }

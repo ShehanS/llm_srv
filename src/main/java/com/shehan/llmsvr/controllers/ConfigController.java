@@ -1,15 +1,22 @@
 package com.shehan.llmsvr.controllers;
 
-import com.shehan.llmsvr.dtos.*;
+import com.shehan.llmsvr.dtos.Agent;
+import com.shehan.llmsvr.dtos.ResponseCode;
+import com.shehan.llmsvr.dtos.ResponseMessage;
+import com.shehan.llmsvr.dtos.RoutingConfig;
 import com.shehan.llmsvr.entites.AgentEntity;
-import com.shehan.llmsvr.entites.ToolEntity;
 import com.shehan.llmsvr.service.ConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -19,6 +26,7 @@ import reactor.core.publisher.Mono;
 public class ConfigController {
 
     private final ConfigService configService;
+    private final List<ToolCallback> toolCallbacks;
 
     @GetMapping("/full/{routeName}")
     public Mono<ResponseEntity<ResponseMessage>> getFullConfig(@PathVariable String routeName) {
@@ -52,41 +60,18 @@ public class ConfigController {
                 .onErrorResume(this::handleError);
     }
 
-    @PutMapping("/tools/{toolId}")
-    public Mono<ResponseEntity<ResponseMessage>> updateTool(@PathVariable Integer toolId, @RequestBody Tool tool) {
-        return configService.updateTool(toolId, tool)
-                .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool updated successfully", null, null))))
-                .onErrorResume(this::handleError);
-    }
 
-    @PostMapping("/tools")
-    public Mono<ResponseEntity<ResponseMessage>> addTool(@RequestBody ToolEntity tool) {
-        return configService.addTool(tool)
-                .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool saved successfully", res, null)))
-                .onErrorResume(this::handleError);
-    }
-
-    @DeleteMapping("/tools/{toolId}")
-    public Mono<ResponseEntity<ResponseMessage>> deleteTool(@PathVariable Integer toolId) {
-        return configService.deleteTool(toolId)
-                .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool deleted successfully", null, null))))
-                .onErrorResume(this::handleError);
-    }
-
-    @PostMapping("/link/{agentId}/{toolId}")
-    public Mono<ResponseEntity<ResponseMessage>> linkTool(@PathVariable Integer agentId, @PathVariable Integer toolId) {
-        return configService.linkToolToAgent(agentId, toolId)
+    @PostMapping("/link/{agentId}/{toolName}")
+    public Mono<ResponseEntity<ResponseMessage>> linkTool(@PathVariable Integer agentId, @PathVariable String toolName) {
+        return configService.linkToolToAgent(agentId, toolName)
                 .then(Mono.just(ResponseEntity.ok(
                         new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool linked successfully", null, null))))
                 .onErrorResume(this::handleError);
     }
 
-    @DeleteMapping("/unlink/{agentId}/{toolId}")
-    public Mono<ResponseEntity<ResponseMessage>> unLinkTool(@PathVariable Integer agentId, @PathVariable Integer toolId) {
-        return configService.unlinkToolFromAgent(agentId, toolId)
+    @DeleteMapping("/unlink/{agentId}/{toolName}")
+    public Mono<ResponseEntity<ResponseMessage>> unLinkTool(@PathVariable Integer agentId, @PathVariable String toolName) {
+        return configService.unlinkToolFromAgent(agentId, toolName)
                 .then(Mono.just(ResponseEntity.ok(
                         new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool unlinked successfully", null, null))))
                 .onErrorResume(this::handleError);
@@ -120,7 +105,13 @@ public class ConfigController {
     public Mono<ResponseEntity<ResponseMessage>> getAllTools() {
         return configService.getAllTools().collectList()
                 .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tools retrieved successfully", res, null)))
+                        new ResponseMessage(
+                                ResponseCode.SUCCESS.getCode(),
+                                "Tools retrieved successfully",
+                                res,
+                                null
+                        )
+                ))
                 .onErrorResume(this::handleError);
     }
 

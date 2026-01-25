@@ -1,8 +1,9 @@
 package com.shehan.llmsvr.helper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import tools.jackson.databind.ObjectMapper;
+
 
 @Converter
 public class JsonConverter implements AttributeConverter<Object, String> {

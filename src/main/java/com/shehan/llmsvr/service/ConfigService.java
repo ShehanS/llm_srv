@@ -5,7 +5,6 @@ import com.shehan.llmsvr.dtos.MainConfig;
 import com.shehan.llmsvr.dtos.RoutingConfig;
 import com.shehan.llmsvr.dtos.Tool;
 import com.shehan.llmsvr.entites.AgentEntity;
-import com.shehan.llmsvr.entites.ToolEntity;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -23,26 +22,19 @@ public interface ConfigService {
 
     Mono<Void> deleteAgent(Integer id);
 
-    Mono<Void> deleteRouteConfig(Integer id);
-
-    Mono<Tool> addTool(ToolEntity tool);
-
-    Mono<Tool> updateTool(Integer id, Tool tool);
-
     Flux<Tool> getAllTools();
 
-    Mono<Void> deleteTool(Integer id);
+    Mono<Void> linkToolToAgent(Integer agentId, String toolName);
 
-    Mono<Void> linkToolToAgent(Integer agentId, Integer toolId);
-
-    Mono<Void> unlinkToolFromAgent(Integer agentId, Integer toolId);
-
+    Mono<Void> unlinkToolFromAgent(Integer agentId, String toolName);
 
     Flux<RoutingConfig> getRoutingConfigs();
 
     Mono<RoutingConfig> addRoutingConfigs(RoutingConfig routingConfig);
 
     Mono<RoutingConfig> updateRoutingConfig(RoutingConfig routing);
+
+    Mono<Void> deleteRouteConfig(Integer id);
 
     Mono<Void> linkAgentToRoute(Integer routeId, Integer agentId);
 
@@ -52,4 +44,3 @@ public interface ConfigService {
 
     Mono<Void> unlinkAgentFromRouteByName(String routeName, String agentName);
 }
-

@@ -1,7 +1,7 @@
 package com.shehan.llmsvr.helper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
-import tools.jackson.databind.ObjectMapper;
 
 public abstract class GenericJsonConverter<T> implements AttributeConverter<T, String> {
     private static final ObjectMapper mapper = new ObjectMapper();
