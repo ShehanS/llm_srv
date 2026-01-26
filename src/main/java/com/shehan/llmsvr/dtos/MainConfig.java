@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
+import java.util.Set;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,4 +15,5 @@ public class MainConfig {
 
     private List<Agent> agents;
     private RoutingConfig routing;
+    private Set<String> dangerousTools;
 }

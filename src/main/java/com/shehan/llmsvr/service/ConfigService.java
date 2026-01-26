@@ -40,6 +40,7 @@ public interface ConfigService {
 
     Mono<Void> unlinkAgentFromRoute(Integer routeId, Integer agentId);
 
+    Mono<Void> markDangerousTool(String toolName, Boolean dangerous);
     Mono<Void> linkAgentToRouteByName(String routeName, String agentName);
 
     Mono<Void> unlinkAgentFromRouteByName(String routeName, String agentName);

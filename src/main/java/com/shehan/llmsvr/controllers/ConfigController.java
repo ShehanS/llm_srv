@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class ConfigController {
 
     private final ConfigService configService;
-    private final List<ToolCallback> toolCallbacks;
+
 
     @GetMapping("/full/{routeName}")
     public Mono<ResponseEntity<ResponseMessage>> getFullConfig(@PathVariable String routeName) {
@@ -115,6 +115,20 @@ public class ConfigController {
                 .onErrorResume(this::handleError);
     }
 
+    @PostMapping("/tools/{toolName}/mark-dangerous")
+    public Mono<ResponseEntity<ResponseMessage>> markDangerousTool(
+            @PathVariable String toolName,
+            @RequestParam Boolean dangerous) {
+        return configService.markDangerousTool(toolName, dangerous)
+                .then(Mono.just(ResponseEntity.ok(
+                        new ResponseMessage(
+                                ResponseCode.SUCCESS.getCode(),
+                                "Tool danger status updated successfully",
+                                null,
+                                null))))
+                .onErrorResume(this::handleError);
+    }
+
     @GetMapping("/routing-config/all")
     public Mono<ResponseEntity<ResponseMessage>> getRoutingConfigs() {
         return configService.getRoutingConfigs().collectList()
@@ -167,4 +181,5 @@ public class ConfigController {
                         ))
         );
     }
+
 }

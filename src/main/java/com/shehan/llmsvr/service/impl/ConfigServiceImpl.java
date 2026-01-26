@@ -5,9 +5,11 @@ import com.shehan.llmsvr.dtos.MainConfig;
 import com.shehan.llmsvr.dtos.RoutingConfig;
 import com.shehan.llmsvr.dtos.Tool;
 import com.shehan.llmsvr.entites.AgentEntity;
+import com.shehan.llmsvr.entites.DangerousToolEntity;
 import com.shehan.llmsvr.entites.RoutingConfigEntity;
 import com.shehan.llmsvr.event.EventPublisher;
 import com.shehan.llmsvr.repositories.AgentRepository;
+import com.shehan.llmsvr.repositories.DangerousToolRepository;
 import com.shehan.llmsvr.repositories.RoutingRepository;
 import com.shehan.llmsvr.service.ConfigService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,28 +34,37 @@ public class ConfigServiceImpl implements ConfigService {
     private final EventPublisher eventPublisher;
     private final List<ToolCallback> toolCallbacks;
 
+    private final DangerousToolRepository dangerousToolRepository;
     @Override
     public Mono<MainConfig> getFullConfig(String routeName) {
         return Mono.fromCallable(() -> routingRepository.findByRouteName(routeName)
                         .orElseThrow(() -> new RuntimeException("Routing config not found for: " + routeName)))
                 .subscribeOn(Schedulers.boundedElastic())
-                .map(entity -> {
-                    List<Agent> assignedAgents = entity.getAgents().stream()
-                            .map(agentEntity -> Agent.fromEntity(agentEntity, Agent.class))
-                            .toList();
-                    return MainConfig.builder()
-                            .agents(assignedAgents)
-                            .routing(RoutingConfig.builder()
-                                    .id(entity.getId())
-                                    .routeName(entity.getRouteName())
-                                    .classifierModel(entity.getClassifierModel())
-                                    .fallbackAgent(entity.getFallbackAgent())
-                                    .routingPrompt(entity.getRoutingPrompt())
-                                    .build())
-                            .build();
+                .flatMap(entity -> {
+                    return Mono.fromCallable(() -> dangerousToolRepository.findAll().stream()
+                                    .filter(DangerousToolEntity::getDangerous)
+                                    .map(DangerousToolEntity::getToolName)
+                                    .collect(Collectors.toSet()))
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .map(dangerousNames -> {
+                                List<Agent> assignedAgents = entity.getAgents().stream()
+                                        .map(agentEntity -> Agent.fromEntity(agentEntity, Agent.class))
+                                        .toList();
+
+                                return MainConfig.builder()
+                                        .agents(assignedAgents)
+                                        .dangerousTools(dangerousNames)
+                                        .routing(RoutingConfig.builder()
+                                                .id(entity.getId())
+                                                .routeName(entity.getRouteName())
+                                                .classifierModel(entity.getClassifierModel())
+                                                .fallbackAgent(entity.getFallbackAgent())
+                                                .routingPrompt(entity.getRoutingPrompt())
+                                                .build())
+                                        .build();
+                            });
                 });
     }
-
     @Override
     public Mono<RoutingConfig> getRouteConfig(String routeName) {
         return Mono.fromCallable(() -> routingRepository.findByRouteName(routeName))
@@ -113,18 +125,23 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public Flux<Tool> getAllTools() {
         return Flux.fromIterable(toolCallbacks)
-                .map(tool -> {
+                .flatMap(tool -> {
                     String name = tool.getToolDefinition().name();
                     String description = tool.getToolDefinition().description();
-                    return Tool.builder()
-                            .name(name)
-                            .description(description)
-                            .type("mcp")
-                            .build();
-                })
-                .subscribeOn(Schedulers.boundedElastic());
+                    return Mono.fromCallable(() ->
+                                    dangerousToolRepository.findByToolName(name)
+                                            .map(DangerousToolEntity::getDangerous)
+                                            .orElse(false)
+                            )
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .map(isDangerous -> Tool.builder()
+                                    .name(name)
+                                    .description(description)
+                                    .type("mcp")
+                                    .dangerous(isDangerous)
+                                    .build());
+                });
     }
-
     @Override
     @Transactional
     public Mono<Void> linkToolToAgent(Integer agentId, String toolName) {
@@ -219,6 +236,24 @@ public class ConfigServiceImpl implements ConfigService {
                     return Mono.empty();
                 })
                 .doOnSuccess(v -> eventPublisher.configSaved());
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> markDangerousTool(String toolName, Boolean dangerous) {
+        return Mono.fromCallable(() -> {
+                    DangerousToolEntity toolEntity = dangerousToolRepository.findByToolName(toolName)
+                            .orElse(DangerousToolEntity.builder()
+                                    .toolName(toolName)
+                                    .build());
+
+
+                    toolEntity.setDangerous(dangerous);
+                    return dangerousToolRepository.save(toolEntity);
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnSuccess(v -> eventPublisher.configSaved())
+                .then();
     }
 
     @Override
