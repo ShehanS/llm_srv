@@ -1,5 +1,6 @@
 package com.shehan.llmsvr.mcpTools;
 
+import com.shehan.llmsvr.dtos.PendingApproval;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -9,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -169,58 +168,4 @@ public class ApprovalTool {
         return stats;
     }
 
-    public static class PendingApproval {
-        private final String requestId;
-        private final String toolName;
-        private final String toolArgs;
-        private final String description;
-        private final long timestamp;
-        private String status;
-        private String action;
-        private String feedback;
-        private boolean approved;
-        private final CompletableFuture<String> completionFuture;
-
-        public PendingApproval(String requestId, String toolName, String toolArgs, String description) {
-            this.requestId = requestId;
-            this.toolName = toolName;
-            this.toolArgs = toolArgs;
-            this.description = description;
-            this.timestamp = System.currentTimeMillis();
-            this.status = "pending";
-            this.approved = false;
-            this.completionFuture = new CompletableFuture<>();
-        }
-
-        public void complete() {
-            completionFuture.complete(action);
-        }
-
-        public String waitForDecision(long timeout, TimeUnit unit) throws Exception {
-            return completionFuture.get(timeout, unit);
-        }
-
-        public String getRequestId() { return requestId; }
-        public String getToolName() { return toolName; }
-        public String getToolArgs() { return toolArgs; }
-        public String getDescription() { return description; }
-        public long getTimestamp() { return timestamp; }
-        public String getStatus() { return status; }
-        public String getAction() { return action; }
-        public String getFeedback() { return feedback; }
-        public boolean isApproved() { return approved; }
-
-        public void setStatus(String status) { this.status = status; }
-        public void setAction(String action) { this.action = action; }
-        public void setFeedback(String feedback) { this.feedback = feedback; }
-        public void setApproved(boolean approved) { this.approved = approved; }
-
-        public long getAge() {
-            return System.currentTimeMillis() - timestamp;
-        }
-
-        public boolean isExpired(long maxAgeMillis) {
-            return getAge() > maxAgeMillis;
-        }
-    }
 }

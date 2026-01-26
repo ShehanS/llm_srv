@@ -210,7 +210,7 @@ public class WorkflowController {
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<Map<String, ApprovalTool.PendingApproval>> getPendingApprovals() {
+    public ResponseEntity<Map<String, PendingApproval>> getPendingApprovals() {
         return ResponseEntity.ok(approvalTool.getPendingApprovals());
     }
 
@@ -221,11 +221,11 @@ public class WorkflowController {
     ) {
         log.info("Submitting decision for session: {} - action: {}", sessionId, request.getAction());
 
-        Map<String, ApprovalTool.PendingApproval> pending = approvalTool.getPendingApprovals();
-        ApprovalTool.PendingApproval targetApproval = null;
+        Map<String, PendingApproval> pending = approvalTool.getPendingApprovals();
+        PendingApproval targetApproval = null;
         String targetRequestId = null;
 
-        for (Map.Entry<String, ApprovalTool.PendingApproval> entry : pending.entrySet()) {
+        for (Map.Entry<String, PendingApproval> entry : pending.entrySet()) {
             if (entry.getKey().startsWith(sessionId + "_") && "pending".equals(entry.getValue().getStatus())) {
                 targetApproval = entry.getValue();
                 targetRequestId = entry.getKey();
@@ -258,7 +258,7 @@ public class WorkflowController {
         );
 
         return webClient.post()
-                .uri("/api/v1/chat/resume/" + sessionId)
+                .uri("/api/v1/conversation/resume/" + sessionId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(resumePayload)
                 .retrieve()
@@ -293,7 +293,7 @@ public class WorkflowController {
 
     @PostMapping("/request")
     public ResponseEntity<Map<String, Object>> createApprovalRequest(
-            @RequestBody ApprovalRequestDTO request
+            @RequestBody ApprovalRequest request
     ) {
         log.info("Creating approval request: {} for session: {}", request.getRequestId(), request.getSessionId());
         Map<String, Object> result = approvalTool.requestApproval(
@@ -312,34 +312,6 @@ public class WorkflowController {
         return ResponseEntity.noContent().build();
     }
 
-    public static class ApprovalRequestDTO {
-        private String requestId;
-        private String toolName;
-        private String toolArgs;
-        private String description;
-        private String sessionId;
-
-        public String getRequestId() { return requestId; }
-        public void setRequestId(String requestId) { this.requestId = requestId; }
-        public String getToolName() { return toolName; }
-        public void setToolName(String toolName) { this.toolName = toolName; }
-        public String getToolArgs() { return toolArgs; }
-        public void setToolArgs(String toolArgs) { this.toolArgs = toolArgs; }
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        public String getSessionId() { return sessionId; }
-        public void setSessionId(String sessionId) { this.sessionId = sessionId; }
-    }
-
-    public static class ApprovalDecisionRequest {
-        private String action;
-        private String feedback;
-
-        public String getAction() { return action; }
-        public void setAction(String action) { this.action = action; }
-        public String getFeedback() { return feedback; }
-        public void setFeedback(String feedback) { this.feedback = feedback; }
-    }
 
     private record WorkflowStatus(String runId) {}
 }
