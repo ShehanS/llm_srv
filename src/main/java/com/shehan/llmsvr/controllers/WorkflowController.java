@@ -1,6 +1,7 @@
 package com.shehan.llmsvr.controllers;
 
 import com.shehan.llmsvr.dtos.*;
+import com.shehan.llmsvr.mcpTools.ApprovalTool;
 import com.shehan.llmsvr.service.WorkflowEngine;
 import com.shehan.llmsvr.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
@@ -9,9 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -22,7 +25,8 @@ import java.util.Map;
 public class WorkflowController {
     private final WorkflowEngine engine;
     private final WorkflowService workflowService;
-
+    private final ApprovalTool approvalTool;
+    private final WebClient webClient;
 
     @PostMapping("/save")
     public Mono<ResponseEntity<ResponseMessage>> save(@RequestBody Workflow flow) {
@@ -77,7 +81,6 @@ public class WorkflowController {
                         )
                 );
     }
-
 
     @GetMapping("/open/{flowId}")
     public Mono<ResponseEntity<ResponseMessage>> open(@PathVariable String flowId) {
@@ -150,6 +153,7 @@ public class WorkflowController {
                 .doOnComplete(() -> log.info("SSE completed for runId: {}", runId))
                 .doOnCancel(() -> log.info("SSE cancelled for runId: {}", runId));
     }
+
     @GetMapping(value = "/runs/{runId}/nodes/{nodeId}/trace/live",
             produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ExecutionTrace> liveNodeTrace(
@@ -204,5 +208,138 @@ public class WorkflowController {
                 )
         );
     }
+
+    @GetMapping("/pending")
+    public ResponseEntity<Map<String, ApprovalTool.PendingApproval>> getPendingApprovals() {
+        return ResponseEntity.ok(approvalTool.getPendingApprovals());
+    }
+
+    @PostMapping("/session/{sessionId}/decide")
+    public Mono<ResponseEntity<Map<String, Object>>> submitDecisionBySession(
+            @PathVariable String sessionId,
+            @RequestBody ApprovalDecisionRequest request
+    ) {
+        log.info("Submitting decision for session: {} - action: {}", sessionId, request.getAction());
+
+        Map<String, ApprovalTool.PendingApproval> pending = approvalTool.getPendingApprovals();
+        ApprovalTool.PendingApproval targetApproval = null;
+        String targetRequestId = null;
+
+        for (Map.Entry<String, ApprovalTool.PendingApproval> entry : pending.entrySet()) {
+            if (entry.getKey().startsWith(sessionId + "_") && "pending".equals(entry.getValue().getStatus())) {
+                targetApproval = entry.getValue();
+                targetRequestId = entry.getKey();
+                log.info("Found pending approval: {}", targetRequestId);
+                break;
+            }
+        }
+
+        if (targetApproval == null) {
+            log.warn("No pending approval found for session: {}", sessionId);
+            return Mono.just(
+                    ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body(Map.of("error", "No pending approval found for session: " + sessionId))
+            );
+        }
+
+        Map<String, Object> approvalResult = approvalTool.submitApprovalDecision(
+                targetRequestId,
+                request.getAction(),
+                request.getFeedback()
+        );
+
+        log.info("Approval marked as {} for requestId: {}", request.getAction(), targetRequestId);
+
+        String finalTargetRequestId = targetRequestId;
+
+        Map<String, String> resumePayload = Map.of(
+                "action", request.getAction(),
+                "feedback", request.getFeedback() != null ? request.getFeedback() : ""
+        );
+
+        return webClient.post()
+                .uri("/api/v1/chat/resume/" + sessionId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(resumePayload)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .map(nodeResponse -> {
+                    log.info("Node.js resume completed successfully");
+
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("status", "success");
+                    result.put("sessionId", sessionId);
+                    result.put("requestId", finalTargetRequestId);
+                    result.put("action", request.getAction());
+                    result.put("workflowResumed", true);
+                    result.put("response", nodeResponse);
+
+                    return ResponseEntity.ok(result);
+                })
+                .onErrorResume(error -> {
+                    log.error("Failed to resume Node.js workflow: {}", error.getMessage(), error);
+
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("status", "error");
+                    result.put("sessionId", sessionId);
+                    result.put("requestId", finalTargetRequestId);
+                    result.put("approvalRecorded", true);
+                    result.put("workflowResumed", false);
+                    result.put("error", error.getMessage());
+
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result));
+                });
+    }
+
+    @PostMapping("/request")
+    public ResponseEntity<Map<String, Object>> createApprovalRequest(
+            @RequestBody ApprovalRequestDTO request
+    ) {
+        log.info("Creating approval request: {} for session: {}", request.getRequestId(), request.getSessionId());
+        Map<String, Object> result = approvalTool.requestApproval(
+                request.getRequestId(),
+                request.getToolName(),
+                request.getToolArgs(),
+                request.getDescription()
+        );
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{requestId}")
+    public ResponseEntity<Void> clearApproval(@PathVariable String requestId) {
+        log.info("Clearing approval: {}", requestId);
+        approvalTool.clearApproval(requestId);
+        return ResponseEntity.noContent().build();
+    }
+
+    public static class ApprovalRequestDTO {
+        private String requestId;
+        private String toolName;
+        private String toolArgs;
+        private String description;
+        private String sessionId;
+
+        public String getRequestId() { return requestId; }
+        public void setRequestId(String requestId) { this.requestId = requestId; }
+        public String getToolName() { return toolName; }
+        public void setToolName(String toolName) { this.toolName = toolName; }
+        public String getToolArgs() { return toolArgs; }
+        public void setToolArgs(String toolArgs) { this.toolArgs = toolArgs; }
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        public String getSessionId() { return sessionId; }
+        public void setSessionId(String sessionId) { this.sessionId = sessionId; }
+    }
+
+    public static class ApprovalDecisionRequest {
+        private String action;
+        private String feedback;
+
+        public String getAction() { return action; }
+        public void setAction(String action) { this.action = action; }
+        public String getFeedback() { return feedback; }
+        public void setFeedback(String feedback) { this.feedback = feedback; }
+    }
+
     private record WorkflowStatus(String runId) {}
 }
