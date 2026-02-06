@@ -93,13 +93,15 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                     }
                     if (result.getStatus() == NodeResult.Status.SKIP) {
                         emitTrace(createTrace(ctx, ExecutionTrace.Status.SKIP, startedAt, inputMessages, result.getMessages(), "Node skipped"));
-                        List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), result.getOutput());
+                        String output = result.getOutput() != null ? result.getOutput() : "";
+                        List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), output);
                         return Flux.fromIterable(nextNodes)
                                 .map(next -> new ExecutionContext(next, inputMessages, ctx.getRunId(), ctx.getAttempt()));
                     }
 
-                    emitTrace(createTrace(ctx, ExecutionTrace.Status.COMPLETE, startedAt, inputMessages, result.getMessages(), null));
-                    List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), result.getOutput());
+                    emitTrace(createTrace(ctx, ExecutionTrace.Status.COMPLETE, startedAt, inputMessages, result.getMessages(), ""));
+                    String output = result.getOutput() != null ? result.getOutput() : "";
+                    List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), output);
                     return Flux.fromIterable(nextNodes)
                             .map(next -> new ExecutionContext(next, result.getMessages(), ctx.getRunId(), ctx.getAttempt()));
                 })

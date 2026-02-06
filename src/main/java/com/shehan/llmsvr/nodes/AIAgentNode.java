@@ -6,7 +6,6 @@ import com.shehan.llmsvr.dtos.WorkflowMessage;
 import com.shehan.llmsvr.helper.ExpressionResolver;
 import com.shehan.llmsvr.helper.NodeConfigUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -36,10 +35,11 @@ public class AIAgentNode implements WorkflowNode {
             inputContext.put("headers", inData.getOrDefault("headers", Collections.emptyMap()));
             inputContext.put("query", inData.getOrDefault("query", Collections.emptyMap()));
             inputContext.put("all", inData);
-
-
             Map<String, Object> requestPayload = buildAgentRequestPayload(config, inputContext, inData);
 
+            if (requestPayload.get("message").equals("confirm") || requestPayload.get("message").equals("reject")) {
+                return NodeResult.skip(new MessageBatch(List.of(new WorkflowMessage(Map.of("status", "skip")))));
+            }
             log.info("Final AI Request Payload: {}", requestPayload);
 
             String url = NodeConfigUtil.getInputProp(config, "agentURL", "");

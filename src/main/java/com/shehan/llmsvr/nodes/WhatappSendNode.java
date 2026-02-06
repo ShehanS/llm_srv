@@ -62,7 +62,7 @@ public class WhatappSendNode implements WorkflowNode {
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("To", "whatsapp:" + finalTo);
-        formData.add("From", "whatsapp:" + from);
+        formData.add("From", "whatsapp:" + sessionId);
         formData.add("Body", body);
 
         try {
@@ -141,15 +141,23 @@ public class WhatappSendNode implements WorkflowNode {
     }
 
     private String extractBody(Map<String, Object> resJson) {
-        if (!(resJson.get("response") instanceof Map)) return "";
-        Map<?, ?> response = (Map<?, ?>) resJson.get("response");
-        if (!(response.get("kwargs") instanceof Map)) return "";
-        Map<?, ?> kwargs = (Map<?, ?>) response.get("kwargs");
-        return kwargs.get("content") != null
-                ? String.valueOf(kwargs.get("content"))
-                : "";
+        if (resJson == null) return "";
+        Object message = resJson.get("message");
+        if (message instanceof String) {
+            return (String) message;
+        }
+        Object responseObj = resJson.get("response");
+        if (responseObj instanceof Map) {
+            Map<?, ?> response = (Map<?, ?>) responseObj;
+            Object kwargsObj = response.get("kwargs");
+            if (kwargsObj instanceof Map) {
+                Map<?, ?> kwargs = (Map<?, ?>) kwargsObj;
+                Object content = kwargs.get("content");
+                return content != null ? String.valueOf(content) : "";
+            }
+        }
+        return "";
     }
-
     private boolean isBlank(String v) {
         return v == null || v.trim().isEmpty();
     }
