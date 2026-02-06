@@ -222,28 +222,40 @@ public class HttpRouteBuilder {
             ServerRequest request,
             Map<String, String> config
     ) {
-        String runId = request.pathVariable("flowId");
+        String flowId = request.pathVariable("flowId");
+        String sessionId = request.pathVariable("sessionId");
 
         return request.bodyToMono(Map.class)
                 .defaultIfEmpty(Map.of())
                 .flatMap(body -> {
                     Map<String, Object> approvalData = new HashMap<>(body);
+                    approvalData.put("sessionId", sessionId);
                     MessageBatch humanInput = new MessageBatch(List.of(new WorkflowMessage(approvalData)));
                     String outputHandle = body.getOrDefault("action", "success").toString();
 
-                    log.info("Resuming workflow instance: {} with action: {}", runId, outputHandle);
+                    log.info("Resuming workflow instance: {} with action: {}", flowId, outputHandle);
+                    if (flowId.isEmpty() || sessionId.isEmpty()) {
+                        return ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(Map.of(
+                                        "status", "error",
+                                        "message", "cannot empty flowId or sessionId",
+                                        "timestamp", System.currentTimeMillis()
+                                ));
+                    }
 
-                    return engine.resume(runId, humanInput, outputHandle)
+                    return engine.resume(flowId, humanInput, outputHandle)
                             .flatMap(id -> ServerResponse.ok()
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .bodyValue(Map.of(
                                             "status", "resumed",
                                             "runId", id,
+                                            "sessionId", sessionId,
                                             "timestamp", System.currentTimeMillis()
                                     )));
                 })
                 .onErrorResume(e -> {
-                    log.error("Approval resume error for runId: {}", runId, e);
+                    log.error("Approval resume error for runId: {}", flowId, e);
                     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .contentType(MediaType.APPLICATION_JSON)
                             .bodyValue(Map.of("error", e.getMessage()));

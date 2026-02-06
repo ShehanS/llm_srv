@@ -14,7 +14,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-
 import java.net.InetAddress;
 import java.time.Instant;
 import java.util.Collections;
@@ -47,6 +46,7 @@ public class HumanApprovalNode implements WorkflowNode {
             log.error("HumanApprovalNode received empty input");
             return NodeResult.error(input);
         }
+        String inboundURL = NodeConfigUtil.getInputProp(config, "inboundWebhookUrl", "");
 
         WorkflowMessage first = input.getItems().get(0);
         Map<String, Object> inData = first.getData();
@@ -57,15 +57,13 @@ public class HumanApprovalNode implements WorkflowNode {
 
             inData.put("node_processed_at", Instant.now().toString());
             inData.put("approval_status", "PROCESSED_BY_NODE");
-
             String sessionId = String.valueOf(inData.get("sessionId"));
-            String agentUrl = intelligentSrvUrl + "/api/v1/approve/" + sessionId;
+            String agentUrl = getBaseUrl() + "/api/workflow/session/" + sessionId + "/decide";
 
             Map<String, Object> actionRequest = new HashMap<>();
-            boolean isApproved = status.toLowerCase().contains("approved") ? true : false;
-            actionRequest.put("approved", isApproved);
+            actionRequest.put("action", action);
 
-            log.info("Notifying AI service at {}: approved={}", agentUrl, isApproved);
+            log.info("Notifying AI service at {}: approved={}", agentUrl, actionRequest);
 
             try {
                 Object response = webClient
@@ -80,18 +78,9 @@ public class HumanApprovalNode implements WorkflowNode {
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode resJson = objectMapper.valueToTree(response);
 
-
-                if ((resJson.get("status").toString().equals("completed"))&&(resJson.get("response").get("kwargs") == null)){
-                    inData.put("response", response);
-                    inData.put("status","error");
-                    inData.put("message","Session id not valid or process already complected");
-                    return NodeResult.error(new MessageBatch(List.of(new WorkflowMessage(inData))));
-
-                }else{
-                    String content =resJson.get("response").get("kwargs").get("content").toString();
-                    inData.put("status","success");
-                    inData.put("message", content);
-                }
+                String content = resJson.get("response").get("response").get("kwargs").get("content").toString();
+                inData.put("status", "success");
+                inData.put("message", content);
 
                 log.info("AI service responded: {}", response);
 
@@ -102,7 +91,7 @@ public class HumanApprovalNode implements WorkflowNode {
                 return NodeResult.error(new MessageBatch(List.of(new WorkflowMessage(inData))));
             }
 
-            return NodeResult.complected(action, new MessageBatch(List.of(new WorkflowMessage(inData))));
+            return NodeResult.complected("success", new MessageBatch(List.of(new WorkflowMessage(inData))));
         }
         Map<String, Object> inputContext = new HashMap<>();
         inputContext.put("input", inData);
@@ -132,21 +121,20 @@ public class HumanApprovalNode implements WorkflowNode {
         String samplePayload = """
                 Sample Payload
                 {
-                    "sessionId": "<<SESSION_ID>>",
-                    "action": "SUCCESS",
-                    "status": "APPROVED || REJECTED",
-                    
+                    "action": "approve",
+                    "feedback": "Approved by admin"
                 }
                 """;
-        outboundPayload.put("callbackUrl", getBaseUrl() + "/service/approve/" + flowId);
+        String callbackUrl = "<<HOST>>:<<PORT>>" + inboundURL.replace("{flowId}", flowId).replace("{sessionId}", sessionId);
+        outboundPayload.put("callbackUrl", callbackUrl);
         outboundPayload.put("sessionId", sessionId);
         outboundPayload.put("samplePayload", samplePayload);
 
-        String webhookUrl = NodeConfigUtil.getInputProp(config, "outboundWebhookUrl", "");
-        if (!webhookUrl.isBlank()) {
-            log.info("Sending approval request to: {}", webhookUrl);
+        String outboundWebhookUrl = NodeConfigUtil.getInputProp(config, "outboundWebhookUrl", "");
+        if (!outboundWebhookUrl.isBlank()) {
+            log.info("Sending approval request to: {}", outboundWebhookUrl);
             webClient.post()
-                    .uri(webhookUrl)
+                    .uri(outboundWebhookUrl)
                     .bodyValue(outboundPayload)
                     .retrieve()
                     .toBodilessEntity()

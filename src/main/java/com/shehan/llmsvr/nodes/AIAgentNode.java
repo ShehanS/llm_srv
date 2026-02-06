@@ -16,8 +16,6 @@ import java.util.*;
 @Slf4j
 @Component
 public class AIAgentNode implements WorkflowNode {
-    @Value("${intelligent-srv.url}")
-    private String intelligentSrvUrl;
     private final WebClient webClient = WebClient.builder().build();
 
     @Override
@@ -62,7 +60,6 @@ public class AIAgentNode implements WorkflowNode {
             Map<String, Object> responseData = response instanceof Map
                     ? (Map<String, Object>) response
                     : Map.of("data", response != null ? response : Collections.emptyMap());
-
             if (Boolean.TRUE.equals(responseData.get("requires_approval")) ||
                     "awaiting_approval".equals(responseData.get("status"))) {
                 responseData.put("flowId", String.valueOf(inData.get("flowId")));
@@ -119,7 +116,6 @@ public class AIAgentNode implements WorkflowNode {
     }
 
     private void normalizeAgentPayload(Map<String, Object> payload, Map<String, Object> inData) {
-        // Handle Messages List
         Object messagesObj = payload.get("messages");
         List<String> normalizedMessages = new ArrayList<>();
 
