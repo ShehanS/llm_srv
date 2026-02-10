@@ -62,7 +62,7 @@ public class WhatappSendNode implements WorkflowNode {
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("To", "whatsapp:" + finalTo);
-        formData.add("From", "whatsapp:" + sessionId);
+        formData.add("From", "whatsapp:" + from);
         formData.add("Body", body);
 
         try {

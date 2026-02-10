@@ -2,21 +2,20 @@ package com.shehan.llmsvr.nodes;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.shehan.llmsvr.dtos.MessageBatch;
-import com.shehan.llmsvr.dtos.NodeResult;
-import com.shehan.llmsvr.dtos.WorkflowMessage;
-import com.shehan.llmsvr.helper.ExpressionResolver;
-import com.shehan.llmsvr.helper.NodeConfigUtil;
+import com.shehan.llmsvr.dtos.*;
+import com.shehan.llmsvr.mcpTools.ApprovalTool;
+import com.shehan.llmsvr.service.AgentService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.InetAddress;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +23,17 @@ import java.util.Map;
 @Slf4j
 @Component
 public class HumanApprovalNode implements WorkflowNode {
-    @Value("${intelligent-srv.url}")
-    private String intelligentSrvUrl;
+
+    private final AgentService agentService;
+    private final ApprovalTool approvalTool;
     private final WebClient webClient = WebClient.builder().build();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private int port;
+
+    public HumanApprovalNode(AgentService agentService, ApprovalTool approvalTool) {
+        this.agentService = agentService;
+        this.approvalTool = approvalTool;
+    }
 
     @Override
     public String getType() {
@@ -43,116 +49,102 @@ public class HumanApprovalNode implements WorkflowNode {
     @SuppressWarnings("unchecked")
     public NodeResult execute(MessageBatch input, Map<String, Object> config) throws Exception {
         if (input == null || input.getItems() == null || input.getItems().isEmpty()) {
-            log.error("HumanApprovalNode received empty input");
             return NodeResult.error(input);
         }
-        String inboundURL = NodeConfigUtil.getInputProp(config, "inboundWebhookUrl", "");
 
         WorkflowMessage first = input.getItems().get(0);
         Map<String, Object> inData = first.getData();
-        String action = String.valueOf(inData.getOrDefault("action", "success"));
-        String status = String.valueOf(inData.getOrDefault("status", ""));
-        if (inData.containsKey("action")) {
-            log.info("Internal Resume Processing: Human chose action [{}] with status [{}]", action, status);
+        String sessionId = String.valueOf(inData.get("sessionId"));
+        String userText = String.valueOf(inData.getOrDefault("body", "")).trim();
 
-            inData.put("node_processed_at", Instant.now().toString());
-            inData.put("approval_status", "PROCESSED_BY_NODE");
-            String sessionId = String.valueOf(inData.get("sessionId"));
-            String agentUrl = getBaseUrl() + "/api/workflow/session/" + sessionId + "/decide";
+        if (userText.equalsIgnoreCase("Confirm") || userText.equalsIgnoreCase("Reject")) {
+            PendingApproval pending = approvalTool.getPendingApprovalForSession(sessionId);
 
-            Map<String, Object> actionRequest = new HashMap<>();
-            actionRequest.put("action", action);
+            if (pending != null) {
+                String decision = userText.equalsIgnoreCase("Confirm") ? "approve" : "reject";
+                ApprovalDecisionRequest actionRequest = new ApprovalDecisionRequest();
+                actionRequest.setAction(decision);
 
-            log.info("Notifying AI service at {}: approved={}", agentUrl, actionRequest);
+                try {
+                    Map<String, Object> response = agentService.resume(sessionId, actionRequest).block();
+                    approvalTool.submitApprovalDecision(pending.getRequestId(), decision, "WhatsApp Decision");
 
-            try {
-                Object response = webClient
-                        .post()
-                        .uri(agentUrl)
-                        .bodyValue(actionRequest)
-                        .retrieve()
-                        .toEntity(Object.class)
-                        .map(res -> res.getBody() != null ? res.getBody() : "SUCCESS")
-                        .block();
+                    JsonNode resJson = objectMapper.valueToTree(response);
+                    JsonNode aiNode = resJson.path("response");
 
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode resJson = objectMapper.valueToTree(response);
+                    String content = aiNode.path("response").path("kwargs").path("content").asText();
+                    if (content.isEmpty()) {
+                        content = aiNode.path("response").path("content").asText();
+                    }
+                    if (content.isEmpty()) {
+                        content = aiNode.path("agentResponse").path("kwargs").path("content").asText();
+                    }
 
-                String content = resJson.get("response").get("response").get("kwargs").get("content").toString();
-                inData.put("status", "success");
-                inData.put("message", content);
+                    Map<String, Object> mutableData = new HashMap<>(inData);
+                    mutableData.put("status", "success");
+                    mutableData.put("message", content);
+                    mutableData.put("node_processed_at", Instant.now().toString());
 
-                log.info("AI service responded: {}", response);
-
-            } catch (Exception e) {
-                log.error("Failed to notify AI service: {}", e.getMessage());
-                inData.put("status", "error");
-                inData.put("message", "Session id not found");
-                return NodeResult.error(new MessageBatch(List.of(new WorkflowMessage(inData))));
-            }
-
-            return NodeResult.complected("success", new MessageBatch(List.of(new WorkflowMessage(inData))));
-        }
-        Map<String, Object> inputContext = new HashMap<>();
-        inputContext.put("input", inData);
-        inputContext.put("body", inData.getOrDefault("body", inData));
-        inputContext.put("headers", inData.getOrDefault("headers", Collections.emptyMap()));
-        inputContext.put("all", inData);
-        Map<String, Object> webhookPayload = new HashMap<>();
-
-        String payloadSource = NodeConfigUtil.getMapperPayloadSource(config, "inputMapper", "");
-        if (!payloadSource.isBlank() && inputContext.containsKey(payloadSource)) {
-            Object sourceData = inputContext.get(payloadSource);
-            if (sourceData instanceof Map) {
-                webhookPayload.putAll((Map<String, Object>) sourceData);
-            }
-        }
-
-        Map<String, Object> resolvedInput = ExpressionResolver.resolve(
-                config,
-                "inputMapper",
-                inputContext,
-                new HashMap<>()
-        );
-        if (resolvedInput != null) webhookPayload.putAll(resolvedInput);
-        Map<String, Object> outboundPayload = new HashMap<>();
-        String flowId = String.valueOf(inData.getOrDefault("flowId", ""));
-        String sessionId = String.valueOf(inData.getOrDefault("sessionId", ""));
-        String samplePayload = """
-                Sample Payload
-                {
-                    "action": "approve",
-                    "feedback": "Approved by admin"
+                    return NodeResult.complected("success", new MessageBatch(List.of(new WorkflowMessage(mutableData))));
+                } catch (Exception e) {
+                    log.error("Resume failed for session {}: {}", sessionId, e.getMessage());
+                    return NodeResult.error(input);
                 }
-                """;
-        String callbackUrl = "<<HOST>>:<<PORT>>" + inboundURL.replace("{flowId}", flowId).replace("{sessionId}", sessionId);
-        outboundPayload.put("callbackUrl", callbackUrl);
-        outboundPayload.put("sessionId", sessionId);
-        outboundPayload.put("samplePayload", samplePayload);
-
-        String outboundWebhookUrl = NodeConfigUtil.getInputProp(config, "outboundWebhookUrl", "");
-        if (!outboundWebhookUrl.isBlank()) {
-            log.info("Sending approval request to: {}", outboundWebhookUrl);
-            webClient.post()
-                    .uri(outboundWebhookUrl)
-                    .bodyValue(outboundPayload)
-                    .retrieve()
-                    .toBodilessEntity()
-                    .subscribe(
-                            resp -> log.info("Approval webhook successfully delivered"),
-                            err -> log.error("Failed to deliver approval webhook: {}", err.getMessage())
-                    );
+            }
         }
+
+        String aiMessage = extractAiContent(inData);
+        processNotifications(config, sessionId, aiMessage);
 
         return NodeResult.waitFormApproval(Map.of(
-                "message", "Awaiting human-in-the-loop decision",
-                "requestSent", webhookPayload,
-                "waitingSince", Instant.now().toString()
+                "status", "awaiting_human_decision",
+                "sessionId", sessionId,
+                "timestamp", Instant.now().toString()
         ));
     }
 
-    private String getBaseUrl() {
-        return "http://" + getHost() + ":" + port;
+    private String extractAiContent(Map<String, Object> inData) {
+        try {
+            Object resp = inData.get("response");
+            if (resp instanceof Map) {
+                Map<String, Object> kwargs = (Map<String, Object>) ((Map<String, Object>) resp).get("kwargs");
+                if (kwargs != null && kwargs.containsKey("content")) {
+                    return String.valueOf(kwargs.get("content"));
+                }
+            }
+        } catch (Exception e) {}
+        return "A sensitive operation requires your approval.";
+    }
+
+    private void processNotifications(Map<String, Object> config, String sessionId, String content) {
+        List<Map<String, Object>> approvals = (List<Map<String, Object>>) config.get("approval");
+        if (approvals == null) return;
+        for (Map<String, Object> method : approvals) {
+            if ("whatapp".equals(method.get("service"))) {
+                sendWhatsApp(config, sessionId, content);
+            }
+        }
+    }
+
+    private void sendWhatsApp(Map<String, Object> config, String sessionId, String bodyContent) {
+        String accountId = String.valueOf(config.get("accountId"));
+        String token = String.valueOf(config.get("token"));
+        String from = String.valueOf(config.get("from"));
+        String url = "https://api.twilio.com/2010-04-01/Accounts/" + accountId + "/Messages.json";
+
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("To", "whatsapp:" + sessionId);
+        formData.add("From", "whatsapp:" + from);
+        formData.add("Body", "⚠️ *Approval Required*\n\n" + bodyContent + "\n\nReply *Confirm* to proceed or *Reject* to cancel.");
+
+        webClient.post()
+                .uri(url)
+                .headers(h -> h.setBasicAuth(accountId, token))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .bodyValue(formData)
+                .retrieve()
+                .toBodilessEntity()
+                .subscribe();
     }
 
     private String getHost() {
