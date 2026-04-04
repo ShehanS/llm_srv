@@ -27,6 +27,12 @@ public class AgentEntity implements Serializable {
     private String displayName;
 
     @Column(columnDefinition = "TEXT")
+    private String environment;
+
+    @Column(columnDefinition = "TEXT", name = "base_url")
+    private String baseURL;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(columnDefinition = "TEXT")

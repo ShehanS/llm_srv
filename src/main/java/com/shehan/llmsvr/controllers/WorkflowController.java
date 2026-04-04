@@ -312,6 +312,12 @@ public class WorkflowController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping(path = "/order")
+    public ResponseEntity<Void> order(@RequestBody HashMap request) {
+        log.info("Request: {}", request);
+        return ResponseEntity.noContent().build();
+    }
+
 
     private record WorkflowStatus(String runId) {}
 }

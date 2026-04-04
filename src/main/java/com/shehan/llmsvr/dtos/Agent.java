@@ -22,6 +22,8 @@ public class Agent extends BaseClass<Agent, AgentEntity> {
     private Boolean isDefault;
     private ModelConfig model;
     private String systemPrompt;
+    private String environment;
+    private String baseURL;
     private Set<String> tools;
 
 }
