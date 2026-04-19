@@ -110,6 +110,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                     return Flux.error(e);
                 });
     }
+
     private List<FlowNode> findNextNodes(WorkflowDefinition wf, String sourceId, String output) {
         return wf.getEdges().stream()
                 .filter(e -> sourceId.equals(e.getSource()) && output.equals(e.getSourceHandle()))
@@ -120,11 +121,11 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
     private void emitTrace(ExecutionTrace trace) {
         tracesByRunId.computeIfAbsent(trace.getRunId(), k -> new CopyOnWriteArrayList<>()).add(trace);
-        getOrCreateSink(trace.getRunId()).emitNext(trace, Sinks.EmitFailureHandler.FAIL_FAST);
+        getOrCreateSink(trace.getRunId()).emitNext(trace, Sinks.EmitFailureHandler.busyLooping(java.time.Duration.ofSeconds(1)));
     }
 
     private Sinks.Many<ExecutionTrace> getOrCreateSink(String runId) {
-        return sinksByRunId.computeIfAbsent(runId, k -> Sinks.many().multicast().directBestEffort());
+        return sinksByRunId.computeIfAbsent(runId, k -> Sinks.unsafe().many().multicast().onBackpressureBuffer());
     }
 
     private void prepareForRun(String runId) {
@@ -159,7 +160,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
     @Override
     public Mono<String> runFromNode(MessageBatch batch, WorkflowDefinition wf, String startNodeId, String flowId) {
-        prepareForRun(flowId);
+        activeRuns.add(flowId);
         FlowNode start = wf.getNodes().stream().filter(n -> n.getId().equals(startNodeId)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Node not found"));
         executeWorkflow(new ExecutionContext(start, batch, flowId, 0), wf);

@@ -3,6 +3,7 @@ package com.shehan.llmsvr.nodes;
 import com.shehan.llmsvr.dtos.MessageBatch;
 import com.shehan.llmsvr.dtos.NodeResult;
 import com.shehan.llmsvr.dtos.WorkflowMessage;
+import com.shehan.llmsvr.helper.ExpressionResolver;
 import com.shehan.llmsvr.helper.NodeConfigUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -14,6 +15,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +33,16 @@ public class WhatappSendNode implements WorkflowNode {
 
     @Override
     public NodeResult execute(MessageBatch input, Map<String, Object> config) {
+        Map<String, Object> resolver = new HashMap<>();
+        List<Map<String, String>> mappings =
+                NodeConfigUtil.getMapperMap(config, "mapper", Collections.emptyList());
+
+        if (!mappings.isEmpty()) {
+            Map<String, Object> fullContext = new HashMap<>();
+            fullContext.put("all", input);
+            fullContext.put("items", input.getItems());
+            resolver = ExpressionResolver.resolve(config, "mapper", fullContext, null);
+        }
 
         String accountId = NodeConfigUtil.getInputProp(config, "accountId", "");
         String token = NodeConfigUtil.getInputProp(config, "token", "");
@@ -42,23 +55,32 @@ public class WhatappSendNode implements WorkflowNode {
 
         Map<String, Object> resJson = input.getItems().get(0).getData();
 
-        String sessionId = resJson.get("sessionId") != null
-                ? String.valueOf(resJson.get("sessionId"))
-                : null;
+        Object resSessionId = resJson.get("sessionId");
+        Object mappedSessionId = resolver.get("sessionId");
+
+        String sessionId = resSessionId != null ? String.valueOf(resSessionId)
+                : mappedSessionId != null ? String.valueOf(mappedSessionId) : null;
 
         String finalTo = !isBlank(to) ? to : sessionId;
 
         if (!isValidPhone(finalTo)) {
-            return skipped("invalid sessionId or phone number");
+            return skipped("invalid sessionId or phone number: " + finalTo);
         }
 
         String body = extractBody(resJson);
+
+        if (isBlank(body)) {
+            Object mappedMsg = resolver.get("message");
+            if (mappedMsg != null) {
+                body = String.valueOf(mappedMsg);
+            }
+        }
+
         if (isBlank(body)) {
             return skipped("empty message body");
         }
 
-        String url = "https://api.twilio.com/2010-04-01/Accounts/" +
-                accountId + "/Messages.json";
+        String url = "https://api.twilio.com/2010-04-01/Accounts/" + accountId + "/Messages.json";
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("To", "whatsapp:" + finalTo);
@@ -75,9 +97,7 @@ public class WhatappSendNode implements WorkflowNode {
                     .bodyToMono(String.class)
                     .retryWhen(
                             Retry.backoff(3, Duration.ofSeconds(2))
-                                    .filter(ex ->
-                                            ex instanceof WebClientResponseException.TooManyRequests
-                                    )
+                                    .filter(ex -> ex instanceof WebClientResponseException.TooManyRequests)
                     )
                     .block();
 
@@ -85,21 +105,8 @@ public class WhatappSendNode implements WorkflowNode {
 
         } catch (WebClientResponseException.TooManyRequests e) {
             log.warn("Twilio rate limited (429). Message deferred.");
-            return NodeResult.complected(
-                    "retry",
-                    new MessageBatch(
-                            List.of(
-                                    new WorkflowMessage(
-                                            Map.of(
-                                                    "status", "retry",
-                                                    "reason", "twilio_rate_limited",
-                                                    "provider", "twilio"
-                                            )
-                                    )
-                            )
-                    )
-            );
-
+            return NodeResult.complected("retry", new MessageBatch(List.of(new WorkflowMessage(
+                    Map.of("status", "retry", "reason", "twilio_rate_limited", "provider", "twilio")))));
         } catch (Exception e) {
             log.error("WhatsApp send failed", e);
             return NodeResult.error(errorBatch(e.getMessage()));
@@ -107,44 +114,20 @@ public class WhatappSendNode implements WorkflowNode {
     }
 
     private NodeResult skipped(String reason) {
-        return NodeResult.skip(
-                new MessageBatch(
-                        List.of(
-                                new WorkflowMessage(
-                                        Map.of(
-                                                "status", "skipped",
-                                                "reason", reason,
-                                                "provider", "twilio"
-                                        )
-                                )
-                        )
-                )
-        );
+        return NodeResult.skip(new MessageBatch(List.of(new WorkflowMessage(
+                Map.of("status", "skipped", "reason", reason, "provider", "twilio")))));
     }
 
     private NodeResult success(String to, String from) {
-        return NodeResult.complected(
-                "success",
-                new MessageBatch(
-                        List.of(
-                                new WorkflowMessage(
-                                        Map.of(
-                                                "status", "sent",
-                                                "to", to,
-                                                "from", from,
-                                                "provider", "twilio"
-                                        )
-                                )
-                        )
-                )
-        );
+        return NodeResult.complected("success", new MessageBatch(List.of(new WorkflowMessage(
+                Map.of("status", "sent", "to", to, "from", from, "provider", "twilio")))));
     }
 
     private String extractBody(Map<String, Object> resJson) {
         if (resJson == null) return "";
         Object message = resJson.get("message");
-        if (message instanceof String) {
-            return (String) message;
+        if (message != null && !isBlank(String.valueOf(message))) {
+            return String.valueOf(message);
         }
         Object responseObj = resJson.get("response");
         if (responseObj instanceof Map) {
@@ -158,21 +141,18 @@ public class WhatappSendNode implements WorkflowNode {
         }
         return "";
     }
+
     private boolean isBlank(String v) {
         return v == null || v.trim().isEmpty();
     }
 
     private boolean isValidPhone(String value) {
-        return value != null && value.matches("^\\+[1-9]\\d{7,14}$");
+        if (value == null) return false;
+        String cleaned = value.trim();
+        return cleaned.startsWith("+") && cleaned.length() > 8;
     }
 
     private MessageBatch errorBatch(String message) {
-        return new MessageBatch(
-                List.of(
-                        new WorkflowMessage(
-                                Map.of("error", message)
-                        )
-                )
-        );
+        return new MessageBatch(List.of(new WorkflowMessage(Map.of("error", message))));
     }
 }

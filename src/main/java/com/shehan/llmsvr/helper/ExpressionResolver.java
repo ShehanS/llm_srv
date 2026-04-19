@@ -1,5 +1,9 @@
 package com.shehan.llmsvr.helper;
 
+import com.shehan.llmsvr.dtos.MessageBatch;
+import com.shehan.llmsvr.dtos.WorkflowMessage;
+
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +38,7 @@ public class ExpressionResolver {
 
         return result;
     }
+
     public static Object resolve(String expression, Map<String, Object> context) {
         if (expression == null || expression.isBlank()) {
             return null;
@@ -60,13 +65,15 @@ public class ExpressionResolver {
     }
 
     private static Object resolvePath(String path, Map<String, Object> context) {
+        if (path == null || path.isBlank()) return null;
         if ("all".equals(path)) return context;
 
-        String[] parts = path.split("\\.");
+        String[] parts = path.split("\\.|\\[|\\]");
         Object current = context;
 
         for (String part : parts) {
-            current = navigate(current, part);
+            if (part == null || part.isBlank()) continue;
+            current = navigate(current, part.trim());
             if (current == null) return null;
         }
         return current;
@@ -87,11 +94,15 @@ public class ExpressionResolver {
         }
 
         try {
-            var field = obj.getClass().getDeclaredField(key);
-            field.setAccessible(true);
-            return field.get(obj);
+            return obj.getClass().getMethod("get" + key.substring(0, 1).toUpperCase() + key.substring(1)).invoke(obj);
         } catch (Exception e) {
-            return null;
+            try {
+                var field = obj.getClass().getDeclaredField(key);
+                field.setAccessible(true);
+                return field.get(obj);
+            } catch (Exception ex) {
+                return null;
+            }
         }
     }
 
@@ -108,5 +119,13 @@ public class ExpressionResolver {
             idx += sub.length();
         }
         return count;
+    }
+
+    public static String getFlowId(MessageBatch input) {
+        if (input == null || input.getItems() == null || input.getItems().isEmpty()) {
+            return null;
+        }
+        WorkflowMessage firstMessage = input.getItems().get(0);
+        return String.valueOf(firstMessage.getData().get("flowId"));
     }
 }

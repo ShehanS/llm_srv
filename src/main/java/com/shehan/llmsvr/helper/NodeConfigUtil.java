@@ -1,6 +1,5 @@
 package com.shehan.llmsvr.helper;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +71,22 @@ public final class NodeConfigUtil {
                 : fallback;
     }
 
+    public static String getTargetNodeIdByProp(Map<String, Object> config, String propName, String handleId) {
+        List<Map<String, Object>> items = getInputPropList(config, propName, null);
+        if (items == null || handleId == null) return null;
+
+        for (Map<String, Object> entry : items) {
+            if (handleId.equals(String.valueOf(entry.get("id")))) {
+                Object targetNodeObj = entry.get("targetNode");
+
+                if (targetNodeObj instanceof Map<?, ?> targetMap) {
+                    Object idObj = targetMap.get("id");
+                    return idObj != null ? String.valueOf(idObj) : null;
+                }
+            }
+        }
+        return null;
+    }
 
     public static boolean getInputPropBoolean(
             Map<String, Object> config,
@@ -204,13 +219,18 @@ public final class NodeConfigUtil {
 
         Object map = mapper.get("map");
         if (map instanceof List<?>) {
-
             List<Map<String, String>> mappings = (List<Map<String, String>>) map;
 
-            Map<String, String> flowIdMap = new HashMap<>();
-            flowIdMap.put("key", "flowId");
-            flowIdMap.put("value", "{{body.flowId}}");
-            mappings.add(flowIdMap);
+            boolean hasFlowId = mappings.stream()
+                    .anyMatch(m -> "flowId".equals(m.get("key")));
+
+            if (!hasFlowId) {
+                Map<String, String> flowIdMap = new HashMap<>();
+                flowIdMap.put("key", "flowId");
+                flowIdMap.put("value", "{{body.flowId}}");
+                mappings.add(flowIdMap);
+            }
+
             return mappings;
         }
         return fallback;
