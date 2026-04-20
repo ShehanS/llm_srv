@@ -52,18 +52,14 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 item.getData().put("action", outputHandle);
             }
         });
-        log.info("Resuming runId: {} by re-executing HumanApprovalNode: {}", runId, suspendedNode.getId());
         executeWorkflow(new ExecutionContext(suspendedNode, humanInput, runId, 0), suspended.getWf());
         return Mono.just(runId);
     }
 
     private void executeWorkflow(ExecutionContext ctx, WorkflowDefinition wf) {
         Flux.just(ctx)
-                .expand(c -> executeNode(c, wf))
-                .doOnComplete(() -> {
-                    log.info("Workflow execution finished for runId: {}", ctx.getRunId());
-                    activeRuns.remove(ctx.getRunId());
-                })
+                .expand(c -> executeNode(c, wf).subscribeOn(Schedulers.parallel()))
+                .doOnComplete(() -> activeRuns.remove(ctx.getRunId()))
                 .doOnError(error -> {
                     log.error("Workflow failed for runId {}: {}", ctx.getRunId(), error.getMessage());
                     activeRuns.remove(ctx.getRunId());
@@ -91,19 +87,15 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                         emitTrace(createTrace(ctx, ExecutionTrace.Status.FAILED, startedAt, inputMessages, result.getMessages(), "Node execution failed"));
                         return Flux.error(new RuntimeException("Node returned error status"));
                     }
-                    if (result.getStatus() == NodeResult.Status.SKIP) {
-                        emitTrace(createTrace(ctx, ExecutionTrace.Status.SKIP, startedAt, inputMessages, result.getMessages(), "Node skipped"));
-                        String output = result.getOutput() != null ? result.getOutput() : "";
-                        List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), output);
-                        return Flux.fromIterable(nextNodes)
-                                .map(next -> new ExecutionContext(next, inputMessages, ctx.getRunId(), ctx.getAttempt()));
-                    }
 
-                    emitTrace(createTrace(ctx, ExecutionTrace.Status.COMPLETE, startedAt, inputMessages, result.getMessages(), ""));
-                    String output = result.getOutput() != null ? result.getOutput() : "";
-                    List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), output);
+                    ExecutionTrace.Status status = (result.getStatus() == NodeResult.Status.SKIP) ? ExecutionTrace.Status.SKIP : ExecutionTrace.Status.COMPLETE;
+                    MessageBatch outputMessages = result.getMessages() != null ? result.getMessages() : inputMessages;
+                    emitTrace(createTrace(ctx, status, startedAt, inputMessages, outputMessages, ""));
+
+                    List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), result.getOutput() != null ? result.getOutput() : "");
                     return Flux.fromIterable(nextNodes)
-                            .map(next -> new ExecutionContext(next, result.getMessages(), ctx.getRunId(), ctx.getAttempt()));
+                            .flatMap(next -> Mono.just(new ExecutionContext(next, outputMessages, ctx.getRunId(), ctx.getAttempt()))
+                                    .subscribeOn(Schedulers.parallel()));
                 })
                 .onErrorResume(e -> {
                     emitTrace(createTrace(ctx, ExecutionTrace.Status.FAILED, startedAt, inputMessages, null, e.getMessage()));
@@ -125,11 +117,12 @@ public class WorkflowEngineImpl implements WorkflowEngine {
     }
 
     private Sinks.Many<ExecutionTrace> getOrCreateSink(String runId) {
-        return sinksByRunId.computeIfAbsent(runId, k -> Sinks.unsafe().many().multicast().onBackpressureBuffer());
+        return sinksByRunId.computeIfAbsent(runId, k -> Sinks.unsafe().many().replay().all());
     }
 
     private void prepareForRun(String runId) {
         tracesByRunId.remove(runId);
+        sinksByRunId.remove(runId);
         activeRuns.add(runId);
         getOrCreateSink(runId);
     }
@@ -160,11 +153,27 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
     @Override
     public Mono<String> runFromNode(MessageBatch batch, WorkflowDefinition wf, String startNodeId, String flowId) {
-        activeRuns.add(flowId);
-        FlowNode start = wf.getNodes().stream().filter(n -> n.getId().equals(startNodeId)).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Node not found"));
-        executeWorkflow(new ExecutionContext(start, batch, flowId, 0), wf);
-        return Mono.just(flowId);
+        return Mono.fromCallable(() -> {
+            activeRuns.add(flowId);
+            wf.getNodes().stream()
+                    .filter(n -> n.getId().equals(startNodeId))
+                    .findFirst()
+                    .ifPresent(node -> executeWorkflow(new ExecutionContext(node, batch, flowId, 0), wf));
+            return flowId;
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    public Mono<String> runMultipleNodes(MessageBatch batch, WorkflowDefinition wf, List<String> nodeIds, String flowId) {
+        return Mono.fromCallable(() -> {
+            activeRuns.add(flowId);
+            Flux.fromIterable(nodeIds)
+                    .flatMap(id -> Flux.fromIterable(wf.getNodes()).filter(n -> n.getId().equals(id)).take(1))
+                    .doOnNext(node -> executeWorkflow(new ExecutionContext(node, batch, flowId, 0), wf))
+                    .subscribeOn(Schedulers.parallel())
+                    .subscribe();
+            return flowId;
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
@@ -174,7 +183,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
     @Override
     public Flux<ExecutionTrace> liveTrace(String runId) {
-        return getOrCreateSink(runId).asFlux();
+        return getOrCreateSink(runId).asFlux().onBackpressureBuffer();
     }
 
     @Override

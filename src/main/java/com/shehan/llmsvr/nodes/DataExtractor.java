@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 
@@ -54,16 +55,22 @@ public class DataExtractor implements WorkflowNode {
                 return NodeResult.skip(new MessageBatch(List.of(new WorkflowMessage(resolvedData))));
             }
 
-            MessageBatch outputBatch = new MessageBatch(List.of(new WorkflowMessage(resolvedData)));
+            MessageBatch sharedOutputBatch = new MessageBatch(List.of(new WorkflowMessage(resolvedData)));
 
             workflowService.open(flowId)
-                    .doOnNext(wf -> {
-                        targetNodeIds.forEach(targetId ->
-                                workflowEngine.runFromNode(outputBatch, wf.getDefinition(), targetId, flowId)
-                        );
-                    })
-                    .subscribe();
-            return NodeResult.complected(targetNodeIds.get(0), outputBatch);
+                    .flatMap(wf -> workflowEngine.runMultipleNodes(
+                            sharedOutputBatch,
+                            wf.getDefinition(),
+                            targetNodeIds,
+                            flowId
+                    ))
+                    .subscribeOn(Schedulers.parallel())
+                    .subscribe(
+                            id -> log.info("Successfully triggered multiple nodes for flow: {}", id),
+                            error -> log.error("Error triggering multiple nodes for flow {}: {}", flowId, error.getMessage())
+                    );
+
+            return NodeResult.complected(targetNodeIds.get(0), sharedOutputBatch);
 
         } catch (Exception e) {
             log.error("DataExtractor error", e);
