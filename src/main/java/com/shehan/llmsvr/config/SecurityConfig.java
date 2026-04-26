@@ -53,8 +53,10 @@ public class SecurityConfig {
                 )
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .pathMatchers("/whatapp-webhook/**").permitAll()
                         .pathMatchers("/api/public/**", "/api/workflow/health").permitAll()
                         .pathMatchers("/api/workflow/ws/**").permitAll()
+                        .pathMatchers("/api/config/full/**").permitAll()
                         .pathMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyExchange().authenticated()
                 )
