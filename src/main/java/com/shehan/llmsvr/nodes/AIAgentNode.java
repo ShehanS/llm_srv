@@ -36,6 +36,7 @@ public class AIAgentNode implements WorkflowNode {
             inputContext.put("query", inData.getOrDefault("query", Collections.emptyMap()));
             inputContext.put("all", inData);
             Map<String, Object> requestPayload = buildAgentRequestPayload(config, inputContext, inData);
+            requestPayload.put("flowId", "9961488e-c993-4fed-a914-3320637ec988");
 
             if (requestPayload.get("message").equals("confirm") || requestPayload.get("message").equals("reject")) {
                 return NodeResult.skip(new MessageBatch(List.of(new WorkflowMessage(Map.of("status", "skip")))));

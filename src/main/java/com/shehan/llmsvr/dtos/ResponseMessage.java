@@ -1,18 +1,32 @@
 package com.shehan.llmsvr.dtos;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.Instant;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ResponseMessage {
-    protected String code;
-    protected String message;
-    protected Object data;
-    protected Object error;
+    private String code;
+    private String message;
+    private Object data;
+    private Object error;
+
+    @Builder.Default
+    private Instant timestamp = Instant.now();
 
     public static ResponseMessage getInstance(ResponseCode responseCode, Object data, Object error) {
-        ResponseMessage responseMessage = new ResponseMessage(responseCode.getCode(), responseCode.getMessage(), data, error);
-        return responseMessage;
+        return ResponseMessage.builder()
+                .code(responseCode.getCode())
+                .message(responseCode.getMessage())
+                .data(data)
+                .error(error)
+                .timestamp(Instant.now())
+                .build();
     }
 }

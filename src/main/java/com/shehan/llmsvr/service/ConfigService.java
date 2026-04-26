@@ -2,9 +2,8 @@ package com.shehan.llmsvr.service;
 
 import com.shehan.llmsvr.dtos.Agent;
 import com.shehan.llmsvr.dtos.MainConfig;
-import com.shehan.llmsvr.dtos.RoutingConfig;
-import com.shehan.llmsvr.dtos.Tool;
-import com.shehan.llmsvr.entites.AgentEntity;
+import com.shehan.llmsvr.dtos.RoutingAgent;
+import com.shehan.llmsvr.dtos.AgentTool;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -12,9 +11,9 @@ public interface ConfigService {
 
     Mono<MainConfig> getFullConfig(String routeName);
 
-    Mono<RoutingConfig> getRouteConfig(String routeName);
+    Mono<RoutingAgent> getRouteConfig(String routeName);
 
-    Mono<Agent> addAgent(AgentEntity agent);
+    Mono<Agent> addAgent(Agent agent);
 
     Mono<Agent> updateAgent(Integer id, Agent agent);
 
@@ -22,26 +21,31 @@ public interface ConfigService {
 
     Mono<Void> deleteAgent(Integer id);
 
-    Flux<Tool> getAllTools();
+    Flux<AgentTool> getAllTools();
 
     Mono<Void> linkToolToAgent(Integer agentId, String toolName);
 
     Mono<Void> unlinkToolFromAgent(Integer agentId, String toolName);
 
-    Flux<RoutingConfig> getRoutingConfigs();
+    Flux<RoutingAgent> getRoutingConfigs();
 
-    Mono<RoutingConfig> addRoutingConfigs(RoutingConfig routingConfig);
+    Mono<RoutingAgent> addRoutingAgent(RoutingAgent routingAgent);
 
-    Mono<RoutingConfig> updateRoutingConfig(RoutingConfig routing);
+    Mono<RoutingAgent> updateRoutingAgent(RoutingAgent routing);
 
-    Mono<Void> deleteRouteConfig(Integer id);
+    Mono<Void> deleteRouteAgent(Integer id);
 
-    Mono<Void> linkAgentToRoute(Integer routeId, Integer agentId);
+    Mono<Void> linkAgentToRouteAgent(Integer routeId, Integer agentId);
 
-    Mono<Void> unlinkAgentFromRoute(Integer routeId, Integer agentId);
+    Mono<Void> unlinkAgentFromRouteAgent(Integer routeId, Integer agentId);
 
     Mono<Void> markDangerousTool(String toolName, Boolean dangerous);
     Mono<Void> linkAgentToRouteByName(String routeName, String agentName);
 
     Mono<Void> unlinkAgentFromRouteByName(String routeName, String agentName);
+
+    Mono<String> copyTool(AgentTool tool);
+    Mono<Void> deleteTool(Integer tool);
+
+    Mono<Void> updateTool(Integer id, AgentTool tool);
 }

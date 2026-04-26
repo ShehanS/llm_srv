@@ -1,22 +1,16 @@
 package com.shehan.llmsvr.controllers;
 
-import com.shehan.llmsvr.dtos.Agent;
-import com.shehan.llmsvr.dtos.ResponseCode;
-import com.shehan.llmsvr.dtos.ResponseMessage;
-import com.shehan.llmsvr.dtos.RoutingConfig;
-import com.shehan.llmsvr.entites.AgentEntity;
+import com.shehan.llmsvr.dtos.*;
+import com.shehan.llmsvr.service.CommonToolService;
 import com.shehan.llmsvr.service.ConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.tool.ToolCallback;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.time.Instant;
 
 @Slf4j
 @RestController
@@ -26,91 +20,104 @@ import java.util.stream.Collectors;
 public class ConfigController {
 
     private final ConfigService configService;
-
+    private final CommonToolService commonToolService;
 
     @GetMapping("/full/{routeName}")
     public Mono<ResponseEntity<ResponseMessage>> getFullConfig(@PathVariable String routeName) {
         return configService.getFullConfig(routeName)
-                .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Full configuration retrieved", res, null)))
+                .map(res -> ResponseEntity.ok(buildSuccessResponse("Full configuration retrieved", res)))
                 .onErrorResume(this::handleError);
     }
 
     @PostMapping("/agents")
-    public Mono<ResponseEntity<ResponseMessage>> addAgent(@RequestBody AgentEntity agent) {
+    public Mono<ResponseEntity<ResponseMessage>> addAgent(@RequestBody Agent agent) {
         return configService.addAgent(agent)
-                .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Agent saved successfully", res, null)))
+                .map(res -> ResponseEntity.ok(buildSuccessResponse("Agent saved successfully", res)))
                 .onErrorResume(this::handleError);
     }
 
     @DeleteMapping("/agents/{agentId}")
     public Mono<ResponseEntity<ResponseMessage>> deleteAgent(@PathVariable Integer agentId) {
         return configService.deleteAgent(agentId)
-                .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Agent deleted successfully", null, null))))
+                .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("Agent deleted successfully", null))))
                 .onErrorResume(this::handleError);
     }
 
     @PutMapping("/agents/{agentId}")
     public Mono<ResponseEntity<ResponseMessage>> updateAgent(@PathVariable Integer agentId, @RequestBody Agent agent) {
         return configService.updateAgent(agentId, agent)
-                .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Agent updated successfully", null, null))))
+                .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("Agent updated successfully", null))))
                 .onErrorResume(this::handleError);
     }
-
 
     @PostMapping("/link/{agentId}/{toolName}")
     public Mono<ResponseEntity<ResponseMessage>> linkTool(@PathVariable Integer agentId, @PathVariable String toolName) {
         return configService.linkToolToAgent(agentId, toolName)
-                .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool linked successfully", null, null))))
+                .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("AgentTool linked successfully", null))))
                 .onErrorResume(this::handleError);
     }
 
     @DeleteMapping("/unlink/{agentId}/{toolName}")
     public Mono<ResponseEntity<ResponseMessage>> unLinkTool(@PathVariable Integer agentId, @PathVariable String toolName) {
         return configService.unlinkToolFromAgent(agentId, toolName)
-                .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Tool unlinked successfully", null, null))))
+                .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("AgentTool unlinked successfully", null))))
                 .onErrorResume(this::handleError);
     }
 
-    @PostMapping("/routing-config/{routeId}/link-agent/{agentId}")
-    public Mono<ResponseEntity<ResponseMessage>> linkAgentToRoute(@PathVariable Integer routeId, @PathVariable Integer agentId) {
-        return configService.linkAgentToRoute(routeId, agentId)
-                .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Agent linked to route successfully", null, null))))
+    @PostMapping("/routing-agents/{routeId}/link-agent/{agentId}")
+    public Mono<ResponseEntity<ResponseMessage>> linkAgentToRouteAgent(@PathVariable Integer routeId, @PathVariable Integer agentId) {
+        return configService.linkAgentToRouteAgent(routeId, agentId)
+                .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("Agent linked to route successfully", null))))
                 .onErrorResume(this::handleError);
     }
 
-    @DeleteMapping("/routing-config/{routeId}/unlink-agent/{agentId}")
-    public Mono<ResponseEntity<ResponseMessage>> unlinkAgentFromRoute(@PathVariable Integer routeId, @PathVariable Integer agentId) {
-        return configService.unlinkAgentFromRoute(routeId, agentId)
-                .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Agent unlinked from route successfully", null, null))))
+    @DeleteMapping("/routing-agents/{routeId}/unlink-agent/{agentId}")
+    public Mono<ResponseEntity<ResponseMessage>> unlinkAgentFromRouteAgent(@PathVariable Integer routeId, @PathVariable Integer agentId) {
+        return configService.unlinkAgentFromRouteAgent(routeId, agentId)
+                .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("Agent unlinked from route successfully", null))))
                 .onErrorResume(this::handleError);
     }
 
     @GetMapping("/agents")
     public Mono<ResponseEntity<ResponseMessage>> getAllAgents() {
         return configService.getAllAgents().collectList()
-                .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Agents retrieved successfully", res, null)))
+                .map(res -> ResponseEntity.ok(buildSuccessResponse("Agents retrieved successfully", res)))
+                .onErrorResume(this::handleError);
+    }
+
+    @GetMapping("/common-tools")
+    public Mono<ResponseEntity<ResponseMessage>> getCommonTools() {
+        return commonToolService.loadAllCommonTools().collectList()
+                .map(res -> ResponseEntity.ok(buildSuccessResponse("Common Tools retrieved successfully", res)))
                 .onErrorResume(this::handleError);
     }
 
     @GetMapping("/tools")
     public Mono<ResponseEntity<ResponseMessage>> getAllTools() {
         return configService.getAllTools().collectList()
+                .map(res -> ResponseEntity.ok(buildSuccessResponse("Tools retrieved successfully", res)))
+                .onErrorResume(this::handleError);
+    }
+
+    @DeleteMapping("/tools/{id}")
+    public Mono<ResponseEntity<ResponseMessage>> deleteTool(@PathVariable Integer id) {
+        return configService.deleteTool(id)
+                .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("Tool deleted successfully", null))))
+                .onErrorResume(this::handleError);
+    }
+
+    @PutMapping("/tools/{id}")
+    public Mono<ResponseEntity<ResponseMessage>> updateTool(@PathVariable Integer id, @RequestBody AgentTool tool) {
+        return configService.updateTool(id, tool)
+                .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("Tool deleted successfully", null))))
+                .onErrorResume(this::handleError);
+    }
+
+    @PostMapping("/tools/copy")
+    public Mono<ResponseEntity<ResponseMessage>> copyTool(@RequestBody AgentTool tool) {
+        return configService.copyTool(tool)
                 .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(
-                                ResponseCode.SUCCESS.getCode(),
-                                "Tools retrieved successfully",
-                                res,
-                                null
-                        )
+                        buildSuccessResponse("Tool copy operation completed", res)
                 ))
                 .onErrorResume(this::handleError);
     }
@@ -120,66 +127,65 @@ public class ConfigController {
             @PathVariable String toolName,
             @RequestParam Boolean dangerous) {
         return configService.markDangerousTool(toolName, dangerous)
-                .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(
-                                ResponseCode.SUCCESS.getCode(),
-                                "Tool danger status updated successfully",
-                                null,
-                                null))))
+                .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("AgentTool danger status updated successfully", null))))
                 .onErrorResume(this::handleError);
     }
 
-    @GetMapping("/routing-config/all")
+    @GetMapping("/routing-agents/all")
     public Mono<ResponseEntity<ResponseMessage>> getRoutingConfigs() {
         return configService.getRoutingConfigs().collectList()
-                .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Routing configs retrieved successfully", res, null)))
+                .map(res -> ResponseEntity.ok(buildSuccessResponse("Routing configs retrieved successfully", res)))
                 .onErrorResume(this::handleError);
     }
 
-    @GetMapping("/routing-config/{routeName}")
+    @GetMapping("/routing-agents/{routeName}")
     public Mono<ResponseEntity<ResponseMessage>> getRoutingConfig(@PathVariable String routeName) {
         return configService.getRouteConfig(routeName)
-                .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Routing config retrieved successfully", res, null)))
+                .map(res -> ResponseEntity.ok(buildSuccessResponse("Routing config retrieved successfully", res)))
                 .onErrorResume(this::handleError);
     }
 
-    @PostMapping("/routing-config")
-    public Mono<ResponseEntity<ResponseMessage>> addRoutingConfig(@RequestBody RoutingConfig routingConfig) {
-        return configService.addRoutingConfigs(routingConfig)
-                .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Routing config added successfully", res, null)))
+    @PostMapping("/routing-agents")
+    public Mono<ResponseEntity<ResponseMessage>> addRoutingAgent(@RequestBody RoutingAgent routingAgent) {
+        return configService.addRoutingAgent(routingAgent)
+                .map(res -> ResponseEntity.ok(buildSuccessResponse("Routing config added successfully", res)))
                 .onErrorResume(this::handleError);
     }
 
-    @PutMapping("/routing-config")
-    public Mono<ResponseEntity<ResponseMessage>> updateRoutingConfig(@RequestBody RoutingConfig routingConfig) {
-        return configService.updateRoutingConfig(routingConfig)
-                .map(res -> ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Routing config updated successfully", res, null)))
+    @PutMapping("/routing-agents")
+    public Mono<ResponseEntity<ResponseMessage>> updateRoutingAgent(@RequestBody RoutingAgent routingAgent) {
+        return configService.updateRoutingAgent(routingAgent)
+                .map(res -> ResponseEntity.ok(buildSuccessResponse("Routing config updated successfully", res)))
                 .onErrorResume(this::handleError);
     }
 
-    @DeleteMapping("/routing-config/{id}")
-    public Mono<ResponseEntity<ResponseMessage>> deleteRouteConfig(@PathVariable Integer id) {
-        return configService.deleteRouteConfig(id)
-                .then(Mono.just(ResponseEntity.ok(
-                        new ResponseMessage(ResponseCode.SUCCESS.getCode(), "Route config deleted successfully", null, null))))
+    @DeleteMapping("/routing-agents/{id}")
+    public Mono<ResponseEntity<ResponseMessage>> deleteRouteAgent(@PathVariable Integer id) {
+        return configService.deleteRouteAgent(id)
+                .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("Route config deleted successfully", null))))
                 .onErrorResume(this::handleError);
+    }
+
+
+    private ResponseMessage buildSuccessResponse(String message, Object data) {
+        return ResponseMessage.builder()
+                .code(ResponseCode.SUCCESS.getCode())
+                .message(message)
+                .data(data)
+                .timestamp(Instant.now())
+                .build();
     }
 
     private Mono<ResponseEntity<ResponseMessage>> handleError(Throwable ex) {
         log.error("API Error: ", ex);
         return Mono.just(
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(new ResponseMessage(
-                                ResponseCode.ERROR.getCode(),
-                                null,
-                                ex.getMessage(),
-                                "Operation failed"
-                        ))
+                        .body(ResponseMessage.builder()
+                                .code(ResponseCode.ERROR.getCode())
+                                .message("Operation failed")
+                                .error(ex.getMessage())
+                                .timestamp(Instant.now())
+                                .build())
         );
     }
-
 }

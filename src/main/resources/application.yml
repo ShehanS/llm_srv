@@ -1,11 +1,16 @@
 server:
-  port: 8080
+  port: 9095
 
 spring:
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/llm
 
   main:
     web-application-type: reactive

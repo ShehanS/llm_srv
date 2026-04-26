@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.Set;
 
 @Data
@@ -24,6 +23,5 @@ public class Agent extends BaseClass<Agent, AgentEntity> {
     private String systemPrompt;
     private String environment;
     private String baseURL;
-    private Set<String> tools;
-
+    private Set<AgentTool> tools;
 }

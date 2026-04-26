@@ -17,14 +17,14 @@ import java.io.Serializable;
 public class ModelConfig implements Serializable {
 
     @Column(name = "model_provider")
-    private String provider; // e.g., "openai" or "anthropic"
+    private String provider;
 
     @Column(name = "model_name")
-    private String name; // e.g., "gpt-4o" or "claude-3-5-sonnet-20240620"
+    private String name;
 
     @Column(name = "temperature")
-    private Double temperature; // Default 0.0
+    private Double temperature;
 
     @Column(name = "api_key", columnDefinition = "TEXT")
-    private String apiKey; // Optional: Override the .env key if provided
+    private String apiKey;
 }

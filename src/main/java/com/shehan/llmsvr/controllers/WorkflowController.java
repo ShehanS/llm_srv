@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,111 +32,44 @@ public class WorkflowController {
     @PostMapping("/save")
     public Mono<ResponseEntity<ResponseMessage>> save(@RequestBody Workflow flow) {
         return workflowService.save(flow)
-                .map(res ->
-                        ResponseEntity.ok(
-                                new ResponseMessage(
-                                        ResponseCode.SUCCESS.getCode(),
-                                        "Workflow saved successfully",
-                                        res,
-                                        null)
-                        )
-                )
-                .onErrorResume(ex ->
-                        Mono.just(
-                                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(
-                                                new ResponseMessage(
-                                                        ResponseCode.ERROR.getCode(),
-                                                        null,
-                                                        ex.getMessage(),
-                                                        "Workflow save failed"
-                                                )
-                                        )
-                        )
-                );
+                .map(res -> ResponseEntity.ok(ResponseMessage.builder()
+                        .code(ResponseCode.SUCCESS.getCode())
+                        .message("Workflow saved successfully")
+                        .data(res)
+                        .build()));
     }
 
     @PostMapping("/approval/{runId}/{outputHandle}")
-    public Mono<ResponseEntity<ResponseMessage>> approval(@PathVariable String runId, @RequestBody MessageBatch humanInput, @PathVariable String outputHandle) {
+    public Mono<ResponseEntity<ResponseMessage>> approval(@PathVariable String runId,
+                                                          @RequestBody MessageBatch humanInput,
+                                                          @PathVariable String outputHandle) {
         return engine.resume(runId, humanInput, outputHandle)
-                .map(res ->
-                        ResponseEntity.ok(
-                                new ResponseMessage(
-                                        ResponseCode.SUCCESS.getCode(),
-                                        "Workflow continue successfully",
-                                        res,
-                                        null)
-                        )
-                )
-                .onErrorResume(ex ->
-                        Mono.just(
-                                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(
-                                                new ResponseMessage(
-                                                        ResponseCode.ERROR.getCode(),
-                                                        null,
-                                                        ex.getMessage(),
-                                                        "Workflow save failed"
-                                                )
-                                        )
-                        )
-                );
+                .map(res -> ResponseEntity.ok(ResponseMessage.builder()
+                        .code(ResponseCode.SUCCESS.getCode())
+                        .message("Workflow continue successfully")
+                        .data(res)
+                        .build()));
     }
 
     @GetMapping("/open/{flowId}")
     public Mono<ResponseEntity<ResponseMessage>> open(@PathVariable String flowId) {
         return workflowService.open(flowId)
-                .map(res ->
-                        ResponseEntity.ok(
-                                new ResponseMessage(
-                                        ResponseCode.SUCCESS.getCode(),
-                                        "Workflow open successfully",
-                                        res,
-                                        null)
-                        )
-                )
-                .onErrorResume(ex ->
-                        Mono.just(
-                                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(
-                                                new ResponseMessage(
-                                                        ResponseCode.ERROR.getCode(),
-                                                        null,
-                                                        ex.getMessage(),
-                                                        "Workflow open failed"
-                                                )
-                                        )
-                        )
-                );
+                .map(res -> ResponseEntity.ok(ResponseMessage.builder()
+                        .code(ResponseCode.SUCCESS.getCode())
+                        .message("Workflow open successfully")
+                        .data(res)
+                        .build()));
     }
 
     @GetMapping("/open/all")
     public Mono<ResponseEntity<ResponseMessage>> getAll() {
         return workflowService.getAll()
                 .collectList()
-                .map(res ->
-                        ResponseEntity.ok(
-                                new ResponseMessage(
-                                        ResponseCode.SUCCESS.getCode(),
-                                        "Workflows load successfully",
-                                        res,
-                                        null
-                                )
-                        )
-                )
-                .onErrorResume(ex ->
-                        Mono.just(
-                                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(
-                                                new ResponseMessage(
-                                                        ResponseCode.ERROR.getCode(),
-                                                        null,
-                                                        ex.getMessage(),
-                                                        "Workflows load failed"
-                                                )
-                                        )
-                        )
-                );
+                .map(res -> ResponseEntity.ok(ResponseMessage.builder()
+                        .code(ResponseCode.SUCCESS.getCode())
+                        .message("Workflows load successfully")
+                        .data(res)
+                        .build()));
     }
 
     @GetMapping("/runs/{runId}/trace")
@@ -144,69 +78,41 @@ public class WorkflowController {
         return engine.getTrace(runId);
     }
 
-    @GetMapping(value = "/runs/{runId}/trace/live",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/runs/{runId}/trace/live", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ExecutionTrace> liveTrace(@PathVariable String runId) {
-        log.info("SSE connection established for runId: {}", runId);
-        return engine.liveTrace(runId)
-                .doOnSubscribe(s -> log.info("SSE subscribed for runId: {}", runId))
-                .doOnComplete(() -> log.info("SSE completed for runId: {}", runId))
-                .doOnCancel(() -> log.info("SSE cancelled for runId: {}", runId));
+        return engine.liveTrace(runId);
     }
 
-    @GetMapping(value = "/runs/{runId}/nodes/{nodeId}/trace/live",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ExecutionTrace> liveNodeTrace(
-            @PathVariable String runId,
-            @PathVariable String nodeId) {
-        log.info("SSE node trace for runId: {}, nodeId: {}", runId, nodeId);
-        return engine.liveNodeTrace(runId, nodeId)
-                .doOnSubscribe(s -> log.info("SSE node trace subscribed [runId={}, nodeId={}]",
-                        runId, nodeId));
+    @GetMapping(value = "/runs/{runId}/nodes/{nodeId}/trace/live", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ExecutionTrace> liveNodeTrace(@PathVariable String runId, @PathVariable String nodeId) {
+        return engine.liveNodeTrace(runId, nodeId);
     }
 
     @GetMapping("/runs/{runId}/status")
     public Mono<ResponseEntity<ResponseMessage>> getWorkflowStatus(@PathVariable String runId) {
-        return Mono.just(
-                ResponseEntity.ok(
-                        new ResponseMessage(
-                                ResponseCode.SUCCESS.getCode(),
-                                "Workflow status retrieved",
-                                new WorkflowStatus(runId),
-                                null
-                        )
-                )
-        );
+        return Mono.just(ResponseEntity.ok(ResponseMessage.builder()
+                .code(ResponseCode.SUCCESS.getCode())
+                .message("Workflow status retrieved")
+                .data(new WorkflowStatus(runId))
+                .build()));
     }
 
     @DeleteMapping("/runs/{runId}/reset")
     public Mono<ResponseEntity<ResponseMessage>> resetRunId(@PathVariable String runId) {
-        log.info("Resetting runId: {}", runId);
-        return Mono.just(
-                ResponseEntity.ok(
-                        new ResponseMessage(
-                                ResponseCode.SUCCESS.getCode(),
-                                "RunId reset successfully",
-                                Map.of("runId", runId),
-                                null
-                        )
-                )
-        );
+        return Mono.just(ResponseEntity.ok(ResponseMessage.builder()
+                .code(ResponseCode.SUCCESS.getCode())
+                .message("RunId reset successfully")
+                .data(Map.of("runId", runId))
+                .build()));
     }
 
     @GetMapping("/health")
     public Mono<ResponseEntity<ResponseMessage>> health() {
-        log.info("Health check called");
-        return Mono.just(
-                ResponseEntity.ok(
-                        new ResponseMessage(
-                                ResponseCode.SUCCESS.getCode(),
-                                "Service is running",
-                                Map.of("status", "UP", "timestamp", System.currentTimeMillis()),
-                                null
-                        )
-                )
-        );
+        return Mono.just(ResponseEntity.ok(ResponseMessage.builder()
+                .code(ResponseCode.SUCCESS.getCode())
+                .message("Service is running")
+                .data(Map.of("status", "UP", "timestamp", Instant.now().toEpochMilli()))
+                .build()));
     }
 
     @GetMapping("/pending")
@@ -217,107 +123,45 @@ public class WorkflowController {
     @PostMapping("/session/{sessionId}/decide")
     public Mono<ResponseEntity<Map<String, Object>>> submitDecisionBySession(
             @PathVariable String sessionId,
-            @RequestBody ApprovalDecisionRequest request
-    ) {
-        log.info("Submitting decision for session: {} - action: {}", sessionId, request.getAction());
+            @RequestBody ApprovalDecisionRequest request) {
 
         Map<String, PendingApproval> pending = approvalTool.getPendingApprovals();
-        PendingApproval targetApproval = null;
-        String targetRequestId = null;
+        String targetRequestId = pending.entrySet().stream()
+                .filter(e -> e.getKey().startsWith(sessionId + "_") && "pending".equals(e.getValue().getStatus()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
 
-        for (Map.Entry<String, PendingApproval> entry : pending.entrySet()) {
-            if (entry.getKey().startsWith(sessionId + "_") && "pending".equals(entry.getValue().getStatus())) {
-                targetApproval = entry.getValue();
-                targetRequestId = entry.getKey();
-                log.info("Found pending approval: {}", targetRequestId);
-                break;
-            }
+        if (targetRequestId == null) {
+            return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "No pending approval found")));
         }
 
-        if (targetApproval == null) {
-            log.warn("No pending approval found for session: {}", sessionId);
-            return Mono.just(
-                    ResponseEntity.status(HttpStatus.NOT_FOUND)
-                            .body(Map.of("error", "No pending approval found for session: " + sessionId))
-            );
-        }
-
-        Map<String, Object> approvalResult = approvalTool.submitApprovalDecision(
-                targetRequestId,
-                request.getAction(),
-                request.getFeedback()
-        );
-
-        log.info("Approval marked as {} for requestId: {}", request.getAction(), targetRequestId);
-
-        String finalTargetRequestId = targetRequestId;
-
-        Map<String, String> resumePayload = Map.of(
-                "action", request.getAction(),
-                "feedback", request.getFeedback() != null ? request.getFeedback() : ""
-        );
+        approvalTool.submitApprovalDecision(targetRequestId, request.getAction(), request.getFeedback());
 
         return webClient.post()
                 .uri("/api/v1/conversation/resume/" + sessionId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(resumePayload)
+                .bodyValue(Map.of("action", request.getAction(), "feedback", request.getFeedback() != null ? request.getFeedback() : ""))
                 .retrieve()
                 .bodyToMono(Map.class)
-                .map(nodeResponse -> {
-                    log.info("Node.js resume completed successfully");
-
-                    Map<String, Object> result = new HashMap<>();
-                    result.put("status", "success");
-                    result.put("sessionId", sessionId);
-                    result.put("requestId", finalTargetRequestId);
-                    result.put("action", request.getAction());
-                    result.put("workflowResumed", true);
-                    result.put("response", nodeResponse);
-
-                    return ResponseEntity.ok(result);
-                })
-                .onErrorResume(error -> {
-                    log.error("Failed to resume Node.js workflow: {}", error.getMessage(), error);
-
-                    Map<String, Object> result = new HashMap<>();
-                    result.put("status", "error");
-                    result.put("sessionId", sessionId);
-                    result.put("requestId", finalTargetRequestId);
-                    result.put("approvalRecorded", true);
-                    result.put("workflowResumed", false);
-                    result.put("error", error.getMessage());
-
-                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result));
-                });
+                .map(nodeResponse -> ResponseEntity.ok(Map.of(
+                        "status", "success",
+                        "workflowResumed", true,
+                        "response", nodeResponse)))
+                .onErrorResume(e -> Mono.just(ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()))));
     }
 
     @PostMapping("/request")
-    public ResponseEntity<Map<String, Object>> createApprovalRequest(
-            @RequestBody ApprovalRequest request
-    ) {
-        log.info("Creating approval request: {} for session: {}", request.getRequestId(), request.getSessionId());
-        Map<String, Object> result = approvalTool.requestApproval(
-                request.getRequestId(),
-                request.getToolName(),
-                request.getToolArgs(),
-                request.getDescription()
-        );
-        return ResponseEntity.ok(result);
+    public ResponseEntity<Map<String, Object>> createApprovalRequest(@RequestBody ApprovalRequest request) {
+        return ResponseEntity.ok(approvalTool.requestApproval(
+                request.getRequestId(), request.getToolName(), request.getToolArgs(), request.getDescription()));
     }
 
     @DeleteMapping("/{requestId}")
     public ResponseEntity<Void> clearApproval(@PathVariable String requestId) {
-        log.info("Clearing approval: {}", requestId);
         approvalTool.clearApproval(requestId);
         return ResponseEntity.noContent().build();
     }
-
-    @PostMapping(path = "/order")
-    public ResponseEntity<Void> order(@RequestBody HashMap request) {
-        log.info("Request: {}", request);
-        return ResponseEntity.noContent().build();
-    }
-
 
     private record WorkflowStatus(String runId) {}
 }

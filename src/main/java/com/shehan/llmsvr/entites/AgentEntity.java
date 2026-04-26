@@ -1,12 +1,12 @@
 package com.shehan.llmsvr.entites;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-
 
 @Getter
 @Setter
@@ -15,6 +15,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "agents")
+@ToString(exclude = {"tools", "routingConfigs"})
 public class AgentEntity implements Serializable {
 
     @Id
@@ -42,19 +43,33 @@ public class AgentEntity implements Serializable {
     private Boolean isDefault = false;
 
     @Embedded
-    private ModelConfig model;
+    @Builder.Default
+    private ModelConfig model = new ModelConfig();
 
     @Column(name = "system_prompt", columnDefinition = "TEXT")
     private String systemPrompt;
 
+    @JsonIgnoreProperties("agents")
     @ManyToMany(mappedBy = "agents")
-    private Set<RoutingConfigEntity> routingConfigs = new HashSet<>();
+    @Builder.Default
+    private Set<RoutingAgentEntity> routingConfigs = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "agent_tool_names",
-            joinColumns = @JoinColumn(name = "agent_id")
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "agent_tool_links",
+            joinColumns = @JoinColumn(name = "agent_id"),
+            inverseJoinColumns = @JoinColumn(name = "tool_id")
     )
-    @Column(name = "tools")
-    private Set<String> tools = new HashSet<>();
+    @Builder.Default
+    private Set<AgentToolEntity> tools = new HashSet<>();
+
+    public void addTool(AgentToolEntity tool) {
+        this.tools.add(tool);
+        tool.getAgents().add(this);
+    }
+
+    public void removeTool(AgentToolEntity tool) {
+        this.tools.remove(tool);
+        tool.getAgents().remove(this);
+    }
 }

@@ -14,6 +14,6 @@ import java.util.Set;
 public class MainConfig {
 
     private List<Agent> agents;
-    private RoutingConfig routing;
+    private RoutingAgent routing;
     private Set<String> dangerousTools;
 }
