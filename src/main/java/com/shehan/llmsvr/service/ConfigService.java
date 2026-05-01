@@ -23,9 +23,9 @@ public interface ConfigService {
 
     Flux<AgentTool> getAllTools();
 
-    Mono<Void> linkToolToAgent(Integer agentId, String toolName);
+    Mono<Void> linkToolToAgent(Integer agentId, String toolName, String routeAgent);
 
-    Mono<Void> unlinkToolFromAgent(Integer agentId, String toolName);
+    Mono<Void> unlinkToolFromAgent(Integer agentId, String toolName, String routeAgent);
 
     Flux<RoutingAgent> getRoutingConfigs();
 
@@ -35,11 +35,11 @@ public interface ConfigService {
 
     Mono<Void> deleteRouteAgent(Integer id);
 
-    Mono<Void> linkAgentToRouteAgent(Integer routeId, Integer agentId);
+    Mono<Void> linkAgentToRouteAgent(Integer routeId, Integer agentId, String routeAgent);
 
-    Mono<Void> unlinkAgentFromRouteAgent(Integer routeId, Integer agentId);
+    Mono<Void> unlinkAgentFromRouteAgent(Integer routeId, Integer agentId, String routeAgent);
 
-    Mono<Void> markDangerousTool(String toolName, Boolean dangerous);
+    Mono<Void> markDangerousTool(String toolName, Boolean dangerous, String routeAgent);
     Mono<Void> linkAgentToRouteByName(String routeName, String agentName);
 
     Mono<Void> unlinkAgentFromRouteByName(String routeName, String agentName);

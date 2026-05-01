@@ -57,6 +57,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/public/**", "/api/workflow/health").permitAll()
                         .pathMatchers("/api/workflow/ws/**").permitAll()
                         .pathMatchers("/api/config/full/**").permitAll()
+                        .pathMatchers("/api/config/**").permitAll()
                         .pathMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyExchange().authenticated()
                 )

@@ -44,17 +44,17 @@ public class AppEventListener {
     @EventListener
     public void onConfigChanged(ConfigChangedEvent event) {
         log.info("Configuration change detected for route: {}. Notifying AI Service...");
-        String aiServiceUrl = intelligentSrvUrl + "/api/v1/reload";
+        String aiServiceUrl = intelligentSrvUrl + "/api/v1/fetch-config/" + event.getRouteAgent();
 
-//        webClientBuilder.build()
-//                .post()
-//                .uri(aiServiceUrl)
-//                .retrieve()
-//                .bodyToMono(String.class)
-//                .subscribe(
-//                        response -> log.info("AI Service successfully reloaded: {}", response),
-//                        error -> log.error("Failed to notify AI Service: {}", error.getMessage())
-//                );
+        webClientBuilder.build()
+                .get()
+                .uri(aiServiceUrl)
+                .retrieve()
+                .bodyToMono(String.class)
+                .subscribe(
+                        response -> log.info("AI Service successfully reloaded: {}", response),
+                        error -> log.error("Failed to notify AI Service: {}", error.getMessage())
+                );
     }
 }
 

@@ -50,30 +50,30 @@ public class ConfigController {
                 .onErrorResume(this::handleError);
     }
 
-    @PostMapping("/link/{agentId}/{toolName}")
-    public Mono<ResponseEntity<ResponseMessage>> linkTool(@PathVariable Integer agentId, @PathVariable String toolName) {
-        return configService.linkToolToAgent(agentId, toolName)
+    @PostMapping("/link/{agentId}/{toolName}/route-agent/{routeAgent}")
+    public Mono<ResponseEntity<ResponseMessage>> linkTool(@PathVariable Integer agentId, @PathVariable String toolName, @PathVariable String routeAgent) {
+        return configService.linkToolToAgent(agentId, toolName, routeAgent)
                 .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("AgentTool linked successfully", null))))
                 .onErrorResume(this::handleError);
     }
 
-    @DeleteMapping("/unlink/{agentId}/{toolName}")
-    public Mono<ResponseEntity<ResponseMessage>> unLinkTool(@PathVariable Integer agentId, @PathVariable String toolName) {
-        return configService.unlinkToolFromAgent(agentId, toolName)
+    @DeleteMapping("/unlink/{agentId}/{toolName}/route-agent/{routeAgent}")
+    public Mono<ResponseEntity<ResponseMessage>> unLinkTool(@PathVariable Integer agentId, @PathVariable String toolName, @PathVariable String routeAgent) {
+        return configService.unlinkToolFromAgent(agentId, toolName, routeAgent)
                 .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("AgentTool unlinked successfully", null))))
                 .onErrorResume(this::handleError);
     }
 
-    @PostMapping("/routing-agents/{routeId}/link-agent/{agentId}")
-    public Mono<ResponseEntity<ResponseMessage>> linkAgentToRouteAgent(@PathVariable Integer routeId, @PathVariable Integer agentId) {
-        return configService.linkAgentToRouteAgent(routeId, agentId)
+    @PostMapping("/routing-agents/{routeId}/link-agent/{agentId}/route-agent/{routeAgent}")
+    public Mono<ResponseEntity<ResponseMessage>> linkAgentToRouteAgent(@PathVariable Integer routeId, @PathVariable Integer agentId, @PathVariable String routeAgent) {
+        return configService.linkAgentToRouteAgent(routeId, agentId, routeAgent)
                 .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("Agent linked to route successfully", null))))
                 .onErrorResume(this::handleError);
     }
 
-    @DeleteMapping("/routing-agents/{routeId}/unlink-agent/{agentId}")
-    public Mono<ResponseEntity<ResponseMessage>> unlinkAgentFromRouteAgent(@PathVariable Integer routeId, @PathVariable Integer agentId) {
-        return configService.unlinkAgentFromRouteAgent(routeId, agentId)
+    @DeleteMapping("/routing-agents/{routeId}/unlink-agent/{agentId}/route-agent/{routeAgent}")
+    public Mono<ResponseEntity<ResponseMessage>> unlinkAgentFromRouteAgent(@PathVariable Integer routeId, @PathVariable Integer agentId, @PathVariable String routeAgent) {
+        return configService.unlinkAgentFromRouteAgent(routeId, agentId, routeAgent)
                 .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("Agent unlinked from route successfully", null))))
                 .onErrorResume(this::handleError);
     }
@@ -122,11 +122,11 @@ public class ConfigController {
                 .onErrorResume(this::handleError);
     }
 
-    @PostMapping("/tools/{toolName}/mark-dangerous")
+    @PostMapping("/tools/{toolName}/mark-dangerous/{routeAgent}")
     public Mono<ResponseEntity<ResponseMessage>> markDangerousTool(
             @PathVariable String toolName,
-            @RequestParam Boolean dangerous) {
-        return configService.markDangerousTool(toolName, dangerous)
+            @RequestParam Boolean dangerous, @PathVariable String routeAgent) {
+        return configService.markDangerousTool(toolName, dangerous, routeAgent)
                 .then(Mono.just(ResponseEntity.ok(buildSuccessResponse("AgentTool danger status updated successfully", null))))
                 .onErrorResume(this::handleError);
     }

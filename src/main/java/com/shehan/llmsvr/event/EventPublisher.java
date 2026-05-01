@@ -3,6 +3,7 @@ package com.shehan.llmsvr.event;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.stringtemplate.v4.ST;
 
 @Component
 @RequiredArgsConstructor
@@ -14,7 +15,7 @@ public class EventPublisher {
         publisher.publishEvent(new WorkflowChangedEvent());
     }
 
-    public void configSaved() {
-        publisher.publishEvent(new ConfigChangedEvent());
+    public void configSaved(String routeAgent) {
+        publisher.publishEvent(new ConfigChangedEvent(routeAgent));
     }
 }
