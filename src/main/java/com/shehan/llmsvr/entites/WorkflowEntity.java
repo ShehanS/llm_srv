@@ -32,9 +32,6 @@ public class WorkflowEntity {
     @Column(columnDefinition = "TEXT")
     private WorkflowDefinition definition;
 
-    @Column(name = "flow_state")
-    private boolean state;
-
     @Column(name = "created_at")
     private Instant createdAt;
     @Column(name = "updated_at")

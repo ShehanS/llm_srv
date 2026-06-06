@@ -16,7 +16,7 @@ public class WebSocketConfig {
     @Bean
     public HandlerMapping webSocketHandlerMapping(WorkflowTraceWebSocketHandler handler) {
         Map<String, WebSocketHandler> map = new HashMap<>();
-        map.put("/api/workflow/ws/trace/{runId}", handler);
+        map.put("/api/workflow/ws/trace/**", handler);
 
         SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
         handlerMapping.setOrder(1);

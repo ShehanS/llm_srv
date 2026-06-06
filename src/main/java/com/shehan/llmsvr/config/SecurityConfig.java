@@ -55,7 +55,9 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers("/whatapp-webhook/**").permitAll()
                         .pathMatchers("/api/public/**", "/api/workflow/health").permitAll()
-                        .pathMatchers("/api/workflow/ws/**").permitAll()
+                        .pathMatchers("/api/workflow/ws/**").permitAll() // Permits all WebSocket endpoints
+                        .pathMatchers("/api/workflow/runs/*/trace/live").permitAll() // Permits the fallback SSE endpoint
+                        .pathMatchers("/api/workflow/runs/*/nodes/*/trace/live").permitAll()
                         .pathMatchers("/api/config/full/**").permitAll()
                         .pathMatchers("/api/config/**").permitAll()
                         .pathMatchers("/webhook/**").permitAll()

@@ -1,10 +1,12 @@
 package com.shehan.llmsvr.service.impl;
 
 import com.shehan.llmsvr.dtos.*;
-import com.shehan.llmsvr.nodes.WorkflowNode;
-import com.shehan.llmsvr.service.NodeRegistry;
 import com.shehan.llmsvr.service.WorkflowEngine;
-import com.shehan.llmsvr.service.WorkflowStateManager;
+import com.shehan.llmsvr.service.WorkflowOrchestrator;
+import io.temporal.client.WorkflowClient;
+import io.temporal.client.WorkflowOptions;
+import io.temporal.api.enums.v1.WorkflowIdReusePolicy;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -12,182 +14,125 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
-import java.time.Instant;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class WorkflowEngineImpl implements WorkflowEngine {
 
-    private final NodeRegistry registry;
-    private final WorkflowStateManager stateManager;
-    private final Map<String, List<ExecutionTrace>> tracesByRunId = new ConcurrentHashMap<>();
-    private final Map<String, Sinks.Many<ExecutionTrace>> sinksByRunId = new ConcurrentHashMap<>();
-    private final Set<String> activeRuns = ConcurrentHashMap.newKeySet();
+    private final WorkflowClient workflowClient;
+    private static final String TASK_QUEUE = "AI_WORKFLOW_TASK_QUEUE";
 
-    public WorkflowEngineImpl(NodeRegistry registry, WorkflowStateManager stateManager) {
-        this.registry = registry;
-        this.stateManager = stateManager;
-    }
+    private final Map<String, Sinks.Many<ExecutionTrace>> sinksByRunId = new ConcurrentHashMap<>();
 
     @Override
     public Mono<String> run(MessageBatch startMessages, WorkflowDefinition wf, String runId) {
-        prepareForRun(runId);
-        FlowNode startNode = findStartNode(wf);
-        executeWorkflow(new ExecutionContext(startNode, startMessages, runId, 0), wf);
-        return Mono.just(runId);
+        return Mono.fromCallable(() -> {
+            String uniqueTemporalId = runId + "-" + UUID.randomUUID().toString().substring(0, 8);
+            prepareForRun(runId);
+
+            WorkflowOptions options = WorkflowOptions.newBuilder()
+                    .setTaskQueue(TASK_QUEUE)
+                    .setWorkflowId(uniqueTemporalId)
+                    .setWorkflowIdReusePolicy(WorkflowIdReusePolicy.WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE)
+                    .build();
+
+            WorkflowOrchestrator.StandardEngine workflow = workflowClient.newWorkflowStub(WorkflowOrchestrator.StandardEngine.class, options);
+            WorkflowClient.start(workflow::runTemporalWorkflow, startMessages, wf, runId);
+            return uniqueTemporalId;
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
     public Mono<String> resume(String runId, MessageBatch humanInput, String outputHandle) {
-        WorkflowStateManager.SuspendedState suspended = stateManager.getAndRemove(runId);
-        if (suspended == null) {
-            return Mono.error(new IllegalStateException("No suspended workflow found for runId: " + runId));
-        }
-        FlowNode suspendedNode = suspended.getCtx().getNode();
-        humanInput.getItems().forEach(item -> {
-            if (!item.getData().containsKey("action")) {
-                item.getData().put("action", outputHandle);
-            }
-        });
-        executeWorkflow(new ExecutionContext(suspendedNode, humanInput, runId, 0), suspended.getWf());
-        return Mono.just(runId);
-    }
-
-    private void executeWorkflow(ExecutionContext ctx, WorkflowDefinition wf) {
-        Flux.just(ctx)
-                .expand(c -> executeNode(c, wf).subscribeOn(Schedulers.parallel()))
-                .doOnComplete(() -> activeRuns.remove(ctx.getRunId()))
-                .doOnError(error -> {
-                    log.error("Workflow failed for runId {}: {}", ctx.getRunId(), error.getMessage());
-                    activeRuns.remove(ctx.getRunId());
-                })
-                .subscribeOn(Schedulers.boundedElastic())
-                .subscribe();
-    }
-
-    private Flux<ExecutionContext> executeNode(ExecutionContext ctx, WorkflowDefinition wf) {
-        FlowNode nodeDef = ctx.getNode();
-        MessageBatch inputMessages = ctx.getMessages();
-        Instant startedAt = Instant.now();
-        emitTrace(createTrace(ctx, ExecutionTrace.Status.RUNNING, startedAt, inputMessages, null, null));
-
-        WorkflowNode node = registry.get(nodeDef.getType());
-        return Mono.fromCallable(() -> node.execute(inputMessages, nodeDef.getConfig()))
-                .subscribeOn(Schedulers.boundedElastic())
-                .flatMapMany(result -> {
-                    if (result.getStatus() == NodeResult.Status.WAITING) {
-                        emitTrace(createTrace(ctx, ExecutionTrace.Status.WAITING, startedAt, inputMessages, null, result.getWaitPayload()));
-                        stateManager.save(ctx.getRunId(), wf, ctx);
-                        return Flux.empty();
-                    }
-                    if (result.getStatus() == NodeResult.Status.ERROR) {
-                        emitTrace(createTrace(ctx, ExecutionTrace.Status.FAILED, startedAt, inputMessages, result.getMessages(), "Node execution failed"));
-                        return Flux.error(new RuntimeException("Node returned error status"));
-                    }
-
-                    ExecutionTrace.Status status = (result.getStatus() == NodeResult.Status.SKIP) ? ExecutionTrace.Status.SKIP : ExecutionTrace.Status.COMPLETE;
-                    MessageBatch outputMessages = result.getMessages() != null ? result.getMessages() : inputMessages;
-                    emitTrace(createTrace(ctx, status, startedAt, inputMessages, outputMessages, ""));
-
-                    List<FlowNode> nextNodes = findNextNodes(wf, nodeDef.getId(), result.getOutput() != null ? result.getOutput() : "");
-                    return Flux.fromIterable(nextNodes)
-                            .flatMap(next -> Mono.just(new ExecutionContext(next, outputMessages, ctx.getRunId(), ctx.getAttempt()))
-                                    .subscribeOn(Schedulers.parallel()));
-                })
-                .onErrorResume(e -> {
-                    emitTrace(createTrace(ctx, ExecutionTrace.Status.FAILED, startedAt, inputMessages, null, e.getMessage()));
-                    return Flux.error(e);
-                });
-    }
-
-    private List<FlowNode> findNextNodes(WorkflowDefinition wf, String sourceId, String output) {
-        return wf.getEdges().stream()
-                .filter(e -> sourceId.equals(e.getSource()) && output.equals(e.getSourceHandle()))
-                .map(e -> wf.getNodes().stream().filter(n -> n.getId().equals(e.getTarget())).findFirst().orElse(null))
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
-    private void emitTrace(ExecutionTrace trace) {
-        tracesByRunId.computeIfAbsent(trace.getRunId(), k -> new CopyOnWriteArrayList<>()).add(trace);
-        getOrCreateSink(trace.getRunId()).emitNext(trace, Sinks.EmitFailureHandler.busyLooping(java.time.Duration.ofSeconds(1)));
-    }
-
-    private Sinks.Many<ExecutionTrace> getOrCreateSink(String runId) {
-        return sinksByRunId.computeIfAbsent(runId, k -> Sinks.unsafe().many().replay().all());
-    }
-
-    private void prepareForRun(String runId) {
-        tracesByRunId.remove(runId);
-        sinksByRunId.remove(runId);
-        activeRuns.add(runId);
-        getOrCreateSink(runId);
-    }
-
-    private FlowNode findStartNode(WorkflowDefinition wf) {
-        Set<String> targets = new HashSet<>();
-        wf.getEdges().forEach(e -> targets.add(e.getTarget()));
-        return wf.getNodes().stream()
-                .filter(n -> !targets.contains(n.getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Start node not found"));
-    }
-
-    private ExecutionTrace createTrace(ExecutionContext ctx, ExecutionTrace.Status status, Instant start, MessageBatch input, MessageBatch output, Object metadata) {
-        return ExecutionTrace.builder()
-                .runId(ctx.getRunId())
-                .nodeId(ctx.getNode().getId())
-                .nodeType(ctx.getNode().getType())
-                .config(ctx.getNode().getConfig())
-                .input(input)
-                .output(output)
-                .status(status)
-                .startedAt(start)
-                .completedAt(status == ExecutionTrace.Status.RUNNING ? null : Instant.now())
-                .metadata(metadata)
-                .build();
+        return Mono.fromRunnable(() -> {
+            log.info("Dispatching verification signal down to Temporal for execution id: {}", runId);
+            WorkflowOrchestrator.StandardEngine workflow = workflowClient.newWorkflowStub(WorkflowOrchestrator.StandardEngine.class, runId);
+            workflow.resumeSignal(humanInput, outputHandle);
+        }).subscribeOn(Schedulers.boundedElastic()).thenReturn(runId);
     }
 
     @Override
-    public Mono<String> runFromNode(MessageBatch batch, WorkflowDefinition wf, String startNodeId, String flowId) {
+    public Mono<String> runFromNode(MessageBatch batch, WorkflowDefinition wf, String startNodeId, String runId) {
         return Mono.fromCallable(() -> {
-            activeRuns.add(flowId);
-            wf.getNodes().stream()
-                    .filter(n -> n.getId().equals(startNodeId))
-                    .findFirst()
-                    .ifPresent(node -> executeWorkflow(new ExecutionContext(node, batch, flowId, 0), wf));
-            return flowId;
+            String uniqueTemporalId = runId + "-" + UUID.randomUUID().toString().substring(0, 8);
+            prepareForRun(runId);
+
+            WorkflowOptions options = WorkflowOptions.newBuilder()
+                    .setTaskQueue(TASK_QUEUE)
+                    .setWorkflowId(uniqueTemporalId)
+                    .setWorkflowIdReusePolicy(WorkflowIdReusePolicy.WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE)
+                    .build();
+
+            WorkflowOrchestrator.NodeEngine workflow = workflowClient.newWorkflowStub(WorkflowOrchestrator.NodeEngine.class, options);
+            WorkflowClient.start(workflow::runTemporalFromNode, batch, wf, startNodeId, runId);
+            return uniqueTemporalId;
         }).subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
     public Mono<String> runMultipleNodes(MessageBatch batch, WorkflowDefinition wf, List<String> nodeIds, String flowId) {
         return Mono.fromCallable(() -> {
-            activeRuns.add(flowId);
-            Flux.fromIterable(nodeIds)
-                    .flatMap(id -> Flux.fromIterable(wf.getNodes()).filter(n -> n.getId().equals(id)).take(1))
-                    .doOnNext(node -> executeWorkflow(new ExecutionContext(node, batch, flowId, 0), wf))
-                    .subscribeOn(Schedulers.parallel())
-                    .subscribe();
-            return flowId;
+            String uniqueTemporalId = flowId + "-" + UUID.randomUUID().toString().substring(0, 8);
+            prepareForRun(flowId);
+
+            WorkflowOptions options = WorkflowOptions.newBuilder()
+                    .setTaskQueue(TASK_QUEUE)
+                    .setWorkflowId(uniqueTemporalId)
+                    .setWorkflowIdReusePolicy(WorkflowIdReusePolicy.WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE)
+                    .build();
+
+            WorkflowOrchestrator.ParallelEngine workflow = workflowClient.newWorkflowStub(WorkflowOrchestrator.ParallelEngine.class, options);
+            WorkflowClient.start(workflow::runTemporalMultipleNodes, batch, wf, nodeIds, flowId);
+            return uniqueTemporalId;
         }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    public void receiveExternalTraceUpdate(ExecutionTrace trace) {
+        if (trace != null && trace.getRunId() != null) {
+            log.info("receiveExternalTraceUpdate called for runId: {}", trace.getRunId());
+            log.info("Available sink keys: {}", sinksByRunId.keySet());
+            Sinks.Many<ExecutionTrace> sink = sinksByRunId.get(trace.getRunId());
+            if (sink == null) {
+                log.warn("No sink found for runId: {}", trace.getRunId());
+                return;
+            }
+            Sinks.EmitResult result = sink.tryEmitNext(trace);
+            log.info("Emit result: {}", result);
+        }
     }
 
     @Override
     public Flux<ExecutionTrace> getTrace(String runId) {
-        return Flux.fromIterable(tracesByRunId.getOrDefault(runId, Collections.emptyList()));
+        Sinks.Many<ExecutionTrace> sink = sinksByRunId.get(runId);
+        if (sink == null) {
+            return Flux.empty();
+        }
+        return sink.asFlux().take(Duration.ofMillis(100)).onErrorResume(e -> Flux.empty());
     }
 
     @Override
     public Flux<ExecutionTrace> liveTrace(String runId) {
-        return getOrCreateSink(runId).asFlux().onBackpressureBuffer();
+        log.info("liveTrace subscribed for runId: {}", runId);
+        log.info("Available sink keys at subscription time: {}", sinksByRunId.keySet());
+        return getOrCreateSink(runId).asFlux();
     }
-
     @Override
     public Flux<ExecutionTrace> liveNodeTrace(String runId, String nodeId) {
-        return liveTrace(runId).filter(t -> t.getNodeId().equals(nodeId));
+        return liveTrace(runId).filter(t -> nodeId.equals(t.getNodeId()));
+    }
+
+    private Sinks.Many<ExecutionTrace> getOrCreateSink(String runId) {
+        return sinksByRunId.computeIfAbsent(runId, k ->
+                Sinks.many().multicast().directAllOrNothing()
+        );
+    }
+    private void prepareForRun(String runId) {
+        sinksByRunId.computeIfAbsent(runId, k ->
+                Sinks.many().multicast().directAllOrNothing()
+        );
     }
 }

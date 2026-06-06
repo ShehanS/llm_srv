@@ -24,6 +24,7 @@ import java.util.*;
 public class HttpRouteBuilder {
 
     private final WorkflowService workflowService;
+    // FIXED: Inject the Spring Reactive Engine wrapper instead of the Temporal Orchestrator Interface
     private final WorkflowEngine engine;
 
     public Mono<RouterFunction<ServerResponse>> buildAsync() {
@@ -116,7 +117,7 @@ public class HttpRouteBuilder {
         return workflowService.open(flowId)
                 .flatMap(wf ->
                         request.bodyToMono(Map.class)
-                                .defaultIfEmpty(Map.of())
+                                .defaultIfEmpty(new HashMap<>())
                                 .flatMap(body -> {
                                     body.put("flowId", flowId);
                                     Map<String, Object> messageData = Map.of(
@@ -137,12 +138,14 @@ public class HttpRouteBuilder {
                                             .filter(n -> "trigger.http".equals(n.getType()))
                                             .findFirst().get().getId();
 
+                                    // FIXED: engine.runFromNode returns Mono<String>, compatible with reactive pipeline mapping operators
                                     return engine.runFromNode(batch, wf.getDefinition(), nodeId, flowId)
-                                            .then(ServerResponse.ok()
+                                            .flatMap(runId -> ServerResponse.ok()
                                                     .contentType(MediaType.parseMediaType(mediaType))
                                                     .bodyValue(Map.of(
                                                             "success", true,
                                                             "flowId", flowId,
+                                                            "runId", runId,
                                                             "timestamp", System.currentTimeMillis()
                                                     )));
                                 })
@@ -182,7 +185,7 @@ public class HttpRouteBuilder {
                                 .defaultIfEmpty(new LinkedMultiValueMap<>())
                                 .flatMap(form -> {
                                     Map<String, Object> bodyData = new HashMap<>();
-                                    String contact = form.getFirst("From").replace("whatsapp:", "");
+                                    String contact = form.getFirst("From") != null ? form.getFirst("From").replace("whatsapp:", "") : "";
                                     bodyData.put("contact", contact);
                                     bodyData.put("message", form.getFirst("Body"));
 
@@ -193,12 +196,13 @@ public class HttpRouteBuilder {
                                     data.put("nodeId", nodeId);
                                     data.put("flowId", flowId);
 
+                                    // FIXED: engine.runFromNode returns Mono<String>, chained into a reactive stream response properly
                                     return engine.runFromNode(
                                             new MessageBatch(List.of(new WorkflowMessage(data))),
                                             workflow.getDefinition(),
                                             nodeId,
                                             flowId
-                                    ).then(ServerResponse.ok()
+                                    ).flatMap(runId -> ServerResponse.ok()
                                             .contentType(MediaType.APPLICATION_XML)
                                             .bodyValue("<Response><Message>Thank you..., Your message is processing</Message></Response>"));
                                 })
@@ -226,7 +230,7 @@ public class HttpRouteBuilder {
         String sessionId = request.pathVariable("sessionId");
 
         return request.bodyToMono(Map.class)
-                .defaultIfEmpty(Map.of())
+                .defaultIfEmpty(new HashMap<>())
                 .flatMap(body -> {
                     Map<String, Object> approvalData = new HashMap<>(body);
                     approvalData.put("sessionId", sessionId);
@@ -244,6 +248,7 @@ public class HttpRouteBuilder {
                                 ));
                     }
 
+                    // FIXED: Changed engine method call from .runTemporalFromNode to .resume(flowId, humanInput, outputHandle)
                     return engine.resume(flowId, humanInput, outputHandle)
                             .flatMap(id -> ServerResponse.ok()
                                     .contentType(MediaType.APPLICATION_JSON)
