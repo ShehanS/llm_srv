@@ -16,7 +16,7 @@ public final class WorkflowOrchestrator {
 
     @ActivityInterface
     public interface TraceActivity {
-        @ActivityMethod
+        @ActivityMethod(name = "emit.trace")
         void emitTrace(ExecutionTrace trace);
     }
 

@@ -1,9 +1,11 @@
 package com.shehan.llmsvr.service;
 
+import com.shehan.llmsvr.dtos.FlowNode;
 import com.shehan.llmsvr.dtos.Workflow;
 import com.shehan.llmsvr.dtos.WorkflowDefinition;
 import com.shehan.llmsvr.entites.WorkflowEntity;
 import com.shehan.llmsvr.event.EventPublisher;
+import com.shehan.llmsvr.helper.NodeConfigUtil;
 import com.shehan.llmsvr.repositories.WorkflowRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -28,7 +30,6 @@ public class InMemoryWorkflowService implements WorkflowService {
     private final Map<String, WorkflowDefinition> workflows = new HashMap<>();
 
     private final EventPublisher eventPublisher;
-
 
 
     @Override
@@ -61,11 +62,24 @@ public class InMemoryWorkflowService implements WorkflowService {
                     return Workflow.fromEntity(saved, Workflow.class);
                 })
                 .subscribeOn(Schedulers.boundedElastic())
-                .doOnSuccess(savedWorkflow ->
-                        eventPublisher.workflowSaved()
-                );
+                .doOnSuccess(this::notifySave);
     }
 
+
+    private Mono<Workflow> notifySave(Workflow workflow) {
+        Optional<FlowNode> aiAgentTrigger = workflow.getDefinition()
+                .getNodes()
+                .stream()
+                .filter(node -> "trigger.aiAgent".equals(node.getType()))
+                .findFirst();
+        if (aiAgentTrigger.isPresent()) {
+            String routAgentName = NodeConfigUtil.getInputProp(aiAgentTrigger.get().getConfig(), "routeAgent", "");
+          log.info("Save and send to notify to load agents {}", routAgentName);
+          eventPublisher.configSaved(routAgentName);
+        }
+
+        return Mono.just(workflow);
+    }
 
 
     @Override
@@ -80,7 +94,7 @@ public class InMemoryWorkflowService implements WorkflowService {
     }
 
     @Override
-      public Flux<Workflow> getAll() {
+    public Flux<Workflow> getAll() {
         return Flux.fromIterable(workflowRepository.findAll())
                 .map(entity -> Workflow.fromEntity(entity, Workflow.class))
                 .subscribeOn(Schedulers.boundedElastic());

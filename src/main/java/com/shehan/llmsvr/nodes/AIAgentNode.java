@@ -5,10 +5,13 @@ import com.shehan.llmsvr.dtos.NodeResult;
 import com.shehan.llmsvr.dtos.WorkflowMessage;
 import com.shehan.llmsvr.helper.ExpressionResolver;
 import com.shehan.llmsvr.helper.NodeConfigUtil;
+import com.shehan.llmsvr.service.WorkflowService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 
@@ -16,6 +19,9 @@ import java.util.*;
 @Component
 public class AIAgentNode implements WorkflowNode {
     private final WebClient webClient = WebClient.builder().build();
+    @Autowired
+    private WorkflowService workflow;
+
 
     @Override
     public String getType() {
@@ -36,7 +42,9 @@ public class AIAgentNode implements WorkflowNode {
             inputContext.put("query", inData.getOrDefault("query", Collections.emptyMap()));
             inputContext.put("all", inData);
             Map<String, Object> requestPayload = buildAgentRequestPayload(config, inputContext, inData);
-            requestPayload.put("flowId", "9961488e-c993-4fed-a914-3320637ec988");
+            String flowId = inData.getOrDefault("flowId", "").toString();
+            requestPayload.put("flowId", flowId);
+            requestPayload.put("routeAgent", getRouteAgent(flowId).block());
 
             if (requestPayload.get("message").equals("confirm") || requestPayload.get("message").equals("reject")) {
                 return NodeResult.skip(new MessageBatch(List.of(new WorkflowMessage(Map.of("status", "skip")))));
@@ -136,5 +144,18 @@ public class AIAgentNode implements WorkflowNode {
         } else {
             payload.put("sessionId", String.valueOf(sid));
         }
+    }
+
+    private Mono<String> getRouteAgent(String flowId) {
+        return workflow.open(flowId)
+                .map(wf -> wf.getDefinition()
+                        .getNodes()
+                        .stream()
+                        .filter(node -> "trigger.aiAgent".equals(node.getType()))
+                        .findFirst()
+                        .map(node -> NodeConfigUtil.getInputProp(node.getConfig(), "routeAgent", ""))
+                        .orElse("")
+                )
+                .onErrorReturn("");
     }
 }

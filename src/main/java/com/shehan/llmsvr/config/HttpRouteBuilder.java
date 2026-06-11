@@ -24,7 +24,6 @@ import java.util.*;
 public class HttpRouteBuilder {
 
     private final WorkflowService workflowService;
-    // FIXED: Inject the Spring Reactive Engine wrapper instead of the Temporal Orchestrator Interface
     private final WorkflowEngine engine;
 
     public Mono<RouterFunction<ServerResponse>> buildAsync() {
@@ -138,7 +137,6 @@ public class HttpRouteBuilder {
                                             .filter(n -> "trigger.http".equals(n.getType()))
                                             .findFirst().get().getId();
 
-                                    // FIXED: engine.runFromNode returns Mono<String>, compatible with reactive pipeline mapping operators
                                     return engine.runFromNode(batch, wf.getDefinition(), nodeId, flowId)
                                             .flatMap(runId -> ServerResponse.ok()
                                                     .contentType(MediaType.parseMediaType(mediaType))
@@ -196,7 +194,7 @@ public class HttpRouteBuilder {
                                     data.put("nodeId", nodeId);
                                     data.put("flowId", flowId);
 
-                                    // FIXED: engine.runFromNode returns Mono<String>, chained into a reactive stream response properly
+
                                     return engine.runFromNode(
                                             new MessageBatch(List.of(new WorkflowMessage(data))),
                                             workflow.getDefinition(),

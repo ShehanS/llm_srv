@@ -32,7 +32,7 @@ public class AppEventListener {
     }
 
 
-    @EventListener
+    //@EventListener
     public void onWorkflowChanged(WorkflowChangedEvent event) {
         builder.buildAsync()
                 .doOnNext(holder::update)
@@ -41,7 +41,7 @@ public class AppEventListener {
     }
 
 
-    @EventListener
+    //@EventListener
     public void onConfigChanged(ConfigChangedEvent event) {
         log.info("Configuration change detected for route: {}. Notifying AI Service...");
         String aiServiceUrl = intelligentSrvUrl + "/api/v1/fetch-config/" + event.getRouteAgent();

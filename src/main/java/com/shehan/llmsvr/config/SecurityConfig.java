@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/config/full/**").permitAll()
                         .pathMatchers("/api/config/**").permitAll()
                         .pathMatchers("/webhook/**").permitAll()
+                        .pathMatchers("/sse/**").permitAll()
                         .pathMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyExchange().authenticated()
                 )
